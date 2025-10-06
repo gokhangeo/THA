@@ -63,7 +63,7 @@
                 <p class="text-gray-600 mt-2">Personel bazlı MEGSİS ve NETİGMA giriş takibi.</p>
             </header>
             
-            <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-6 mb-6">
+            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6 mb-6">
                 <div class="bg-white p-4 rounded-xl shadow text-center">
                     <h3 class="text-sm font-medium text-gray-500">Toplam Mahalle</h3>
                     <p id="toplam-mahalle-count" class="mt-1 text-3xl font-semibold text-gray-900">0</p>
@@ -99,7 +99,7 @@
             <div id="interactive-list-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 mb-6">
                 </div>
 
-            <div class="bg-white rounded-xl shadow overflow-hidden"><div class="table-container"><table class="min-w-full divide-y divide-gray-200"><thead class="bg-gray-50"><tr><th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">İlçe</th><th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Mahalle</th><th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Görevli Personel</th><th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Megsis Onay</th><th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Netigma Onay</th><th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Müdür Onay</th><th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Not</th></tr></thead><tbody id="task-table" class="bg-white divide-y divide-gray-200"><tr><td colspan="7" class="text-center p-8 text-gray-500"><div id="loading-state-takip">Veriler yükleniyor...</div></td></tr></tbody></table></div></div>
+            <div class="bg-white rounded-xl shadow overflow-hidden"><div class="table-container"><table class="min-w-full divide-y divide-gray-200"><thead class="bg-gray-50"><tr><th class="px-2 py-3 sm:px-6 sm:py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">İlçe</th><th class="px-2 py-3 sm:px-6 sm:py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Mahalle</th><th class="px-2 py-3 sm:px-6 sm:py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Görevli Personel</th><th class="px-2 py-3 sm:px-6 sm:py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Megsis Onay</th><th class="px-2 py-3 sm:px-6 sm:py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Netigma Onay</th><th class="px-2 py-3 sm:px-6 sm:py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Müdür Onay</th><th class="px-2 py-3 sm:px-6 sm:py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Not</th></tr></thead><tbody id="task-table" class="bg-white divide-y divide-gray-200"><tr><td colspan="7" class="text-center p-8 text-gray-500"><div id="loading-state-takip">Veriler yükleniyor...</div></td></tr></tbody></table></div></div>
         </div>
     </div>
     
@@ -371,13 +371,13 @@
                 } else {
                      taskTable.innerHTML = currentDisplayData.map((task) => `
                         <tr class="hover:bg-gray-50" data-task-ilce="${task.ilce}" data-task-mahalle="${task.mahalle}">
-                            <td class="px-6 py-4 whitespace-nowrap">${task.ilce}</td>
-                            <td class="px-6 py-4 whitespace-nowrap">${task.mahalle}</td>
-                            <td class="px-6 py-4 whitespace-nowrap">${task.personel}</td>
-                            <td class="px-6 py-4 whitespace-nowrap">${task.megsis || '-'}</td>
-                            <td class="px-6 py-4 whitespace-nowrap">${task.netigma || '-'}</td>
-                            <td class="px-6 py-4 whitespace-nowrap">${task.mudur || '-'}</td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 truncate max-w-xs" title="${task.not || ''}">${task.not || '-'}</td>
+                            <td class="px-2 py-3 sm:px-6 sm:py-4 whitespace-nowrap text-xs sm:text-sm">${task.ilce}</td>
+                            <td class="px-2 py-3 sm:px-6 sm:py-4 whitespace-nowrap text-xs sm:text-sm">${task.mahalle}</td>
+                            <td class="px-2 py-3 sm:px-6 sm:py-4 whitespace-nowrap text-xs sm:text-sm">${task.personel}</td>
+                            <td class="px-2 py-3 sm:px-6 sm:py-4 whitespace-nowrap text-xs sm:text-sm">${task.megsis || '-'}</td>
+                            <td class="px-2 py-3 sm:px-6 sm:py-4 whitespace-nowrap text-xs sm:text-sm">${task.netigma || '-'}</td>
+                            <td class="px-2 py-3 sm:px-6 sm:py-4 whitespace-nowrap text-xs sm:text-sm">${task.mudur || '-'}</td>
+                            <td class="px-2 py-3 sm:px-6 sm:py-4 whitespace-nowrap text-xs sm:text-sm text-gray-500 truncate max-w-xs" title="${task.not || ''}">${task.not || '-'}</td>
                         </tr>`).join('');
                 }
                  document.querySelectorAll('#task-table tr').forEach(row => {
