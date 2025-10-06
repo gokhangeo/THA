@@ -418,7 +418,7 @@
                             </div>
                             <div class="mahalle-list hidden border-t border-gray-200 p-2 text-sm space-y-2 bg-gray-50" style="max-height: 300px; overflow-y: auto;">
                                 ${mahalleler.map(m => `
-                                    <div class="p-2 rounded hover:bg-gray-100">
+                                    <div class="mahalle-item p-2 rounded hover:bg-gray-100 cursor-pointer" data-ilce="${ilce}" data-mahalle="${m.mahalle}">
                                         <div class="flex justify-between items-center">
                                             <span class="font-semibold text-gray-800">${m.mahalle}</span>
                                             <div class="flex space-x-1" title="MGS / NTG / MDR">
@@ -436,12 +436,21 @@
                 }
                 interactiveListContainer.innerHTML = html;
 
-                // Add event listeners for accordion
+                // Add event listeners for accordion headers
                 document.querySelectorAll('.ilce-header').forEach(header => {
                     header.addEventListener('click', () => {
                         header.classList.toggle('open');
                         const content = header.nextElementSibling;
                         content.classList.toggle('hidden');
+                    });
+                });
+
+                // Add event listeners for clickable mahalle items
+                document.querySelectorAll('.mahalle-item').forEach(item => {
+                    item.addEventListener('click', () => {
+                        const ilce = item.dataset.ilce;
+                        const mahalle = item.dataset.mahalle;
+                        openEditModal(ilce, mahalle);
                     });
                 });
             }
