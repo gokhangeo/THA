@@ -34,6 +34,7 @@
 </head>
 <body class="text-gray-800">
 
+    <!-- Login Screen -->
     <div id="login-screen" class="flex items-center justify-center min-h-screen bg-gradient-to-br from-blue-100 to-gray-100">
         <div class="w-full max-w-md p-8 space-y-6 bg-white rounded-xl shadow-2xl">
             <h2 class="text-3xl font-bold text-center text-gray-700">THA SİSTEMİ</h2>
@@ -56,13 +57,16 @@
         </div>
     </div>
 
+    <!-- Main Application -->
     <div id="main-app" class="hidden">
+        <!-- İş Takip Page -->
         <div id="takip-page" class="container mx-auto p-4 md:p-8">
              <header class="text-center mb-8">
                 <h1 class="text-3xl md:text-4xl font-bold text-gray-800">THA İŞ TAKİP SİSTEMİ</h1>
                 <p class="text-gray-600 mt-2">Personel bazlı MEGSİS ve NETİGMA giriş takibi.</p>
             </header>
             
+            <!-- Summary Cards -->
             <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6 mb-6">
                 <div id="gunun-ozeti-card" class="bg-white p-4 rounded-xl shadow text-center cursor-pointer hover:bg-gray-50 transition">
                     <h3 class="text-sm font-medium text-gray-500">Günün Özeti</h3>
@@ -100,15 +104,19 @@
                 </div>
             </div>
 
+            <!-- Interactive Accordion List -->
             <div id="interactive-list-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 mb-6">
-                </div>
+                <!-- İlçe cards will be injected here -->
+            </div>
 
             <div class="bg-white rounded-xl shadow overflow-hidden"><div class="table-container"><table class="min-w-full divide-y divide-gray-200"><thead class="bg-gray-50"><tr><th class="px-2 py-3 sm:px-6 sm:py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">İlçe</th><th class="px-2 py-3 sm:px-6 sm:py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Mahalle</th><th class="px-2 py-3 sm:px-6 sm:py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Görevli Personel</th><th class="px-2 py-3 sm:px-6 sm:py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Megsis Onay</th><th class="px-2 py-3 sm:px-6 sm:py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Netigma Onay</th><th class="px-2 py-3 sm:px-6 sm:py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Müdür Onay</th><th class="px-2 py-3 sm:px-6 sm:py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Not</th></tr></thead><tbody id="task-table" class="bg-white divide-y divide-gray-200"><tr><td colspan="7" class="text-center p-8 text-gray-500"><div id="loading-state-takip">Veriler yükleniyor...</div></td></tr></tbody></table></div></div>
         </div>
     </div>
     
+    <!-- Modal (İş Takip için) -->
     <div id="entry-modal" class="fixed z-30 inset-0 overflow-y-auto hidden"><div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0"><div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity"></div><span class="hidden sm:inline-block sm:align-middle sm:h-screen">&#8203;</span><div class="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full"><div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4"><div class="sm:flex sm:items-start"><div class="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left w-full"><h3 class="text-lg leading-6 font-medium text-gray-900" id="modal-title">İş Girişi</h3><div class="mt-4 space-y-4"><div><label for="modal-ilce" class="block text-sm font-medium text-gray-700">İlçe</label><select id="modal-ilce" class="mt-1 block w-full py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"></select></div><div><label for="modal-mahalle" class="block text-sm font-medium text-gray-700">Mahalle</label><select id="modal-mahalle" class="mt-1 block w-full py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"></select></div><div><label for="modal-personel" class="block text-sm font-medium text-gray-700">Personel</label><input type="text" id="modal-personel" class="mt-1 block w-full py-2 px-3 border border-gray-300 bg-gray-100 rounded-md shadow-sm sm:text-sm" readonly></div><div><label for="megsis-date" class="block text-sm font-medium text-gray-700">MEGSİS Onay Tarihi</label><input type="date" id="megsis-date" class="mt-1 block w-full py-2 px-3 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"></div><div><label for="netigma-date" class="block text-sm font-medium text-gray-700">NETİGMA Onay Tarihi</label><input type="date" id="netigma-date" class="mt-1 block w-full py-2 px-3 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"></div><div><label for="mudur-date" class="block text-sm font-medium text-gray-700">MÜDÜR Onay Tarihi</label><input type="date" id="mudur-date" class="mt-1 block w-full py-2 px-3 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"></div><div><label for="modal-not" class="block text-sm font-medium text-gray-700">Not</label><textarea id="modal-not" rows="3" class="mt-1 block w-full py-2 px-3 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"></textarea></div><div id="not-tarihi-container" class="hidden"> <label for="not-tarihi" class="block text-sm font-medium text-gray-700">Not Tarihi</label> <input type="date" id="not-tarihi" class="mt-1 block w-full py-2 px-3 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"></div></div></div></div></div><div class="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse"><button type="button" id="save-entry-btn" class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-blue-600 text-base font-medium text-white hover:bg-blue-700 focus:outline-none sm:ml-3 sm:w-auto sm:text-sm">Kaydet</button><button type="button" id="cancel-btn" class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none sm:mt-0 sm:w-auto sm:text-sm">İptal</button></div></div></div></div>
 
+    <!-- Notes Modal -->
     <div id="notes-modal" class="fixed z-20 inset-0 overflow-y-auto hidden">
         <div class="flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
             <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity"></div>
@@ -131,7 +139,8 @@
                                  </tr>
                             </thead>
                             <tbody id="notes-table-body" class="bg-white divide-y divide-gray-200">
-                                </tbody>
+                                <!-- Notes will be injected here -->
+                            </tbody>
                         </table>
                     </div>
                 </div>
@@ -142,6 +151,7 @@
         </div>
     </div>
     
+    <!-- Approval List Modal -->
     <div id="approval-modal" class="fixed z-20 inset-0 overflow-y-auto hidden">
         <div class="flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
             <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity"></div>
@@ -162,7 +172,8 @@
                                  </tr>
                             </thead>
                             <tbody id="approval-table-body" class="bg-white divide-y divide-gray-200">
-                                </tbody>
+                                <!-- Approved items will be injected here -->
+                            </tbody>
                         </table>
                     </div>
                 </div>
@@ -173,6 +184,7 @@
         </div>
     </div>
 
+    <!-- Günün Özeti Modal -->
     <div id="gunun-ozeti-modal" class="fixed z-20 inset-0 overflow-y-auto hidden">
         <div class="flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
             <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity"></div>
@@ -194,7 +206,8 @@
                                  </tr>
                             </thead>
                             <tbody id="gunun-ozeti-table-body" class="bg-white divide-y divide-gray-200">
-                                </tbody>
+                                <!-- Daily summary will be injected here -->
+                            </tbody>
                         </table>
                     </div>
                 </div>
@@ -537,7 +550,7 @@
                 modalNot.value = task.not || '';
                 notTarihiInput.value = task.not_tarihi || '';
 
-                if (task.not) {
+                if (task.not && task.not.trim() !== '') {
                     notTarihiContainer.classList.remove('hidden');
                 } else {
                     notTarihiContainer.classList.add('hidden');
@@ -604,13 +617,13 @@
             }
 
             function renderNotesModal() {
-                const notedTasks = taskData.filter(task => task.not && task.not.trim() !== '');
+                const notedTasks = taskData.filter(task => task.not && task.not.trim() !== '').sort((a,b) => b.not_tarihi.localeCompare(a.not_tarihi));
                 notesTableBody.innerHTML = '';
                 if (notedTasks.length === 0) {
                     notesTableBody.innerHTML = `<tr><td colspan="5" class="text-center p-8 text-gray-500">Not düşülen birim bulunamadı.</td></tr>`;
                 } else {
                     notesTableBody.innerHTML = notedTasks.map(task => `
-                        <tr class="hover:bg-gray-50">
+                        <tr class="hover:bg-gray-50 cursor-pointer" data-ilce="${task.ilce}" data-mahalle="${task.mahalle}">
                             <td class="px-6 py-4 whitespace-nowrap">${task.ilce}</td>
                             <td class="px-6 py-4 whitespace-nowrap">${task.mahalle}</td>
                             <td class="px-6 py-4 whitespace-nowrap">${task.personel}</td>
@@ -618,12 +631,21 @@
                             <td class="px-6 py-4 whitespace-normal text-sm text-gray-700">${task.not}</td>
                         </tr>
                     `).join('');
+
+                    document.querySelectorAll('#notes-table-body tr[data-ilce]').forEach(row => {
+                        row.addEventListener('click', () => {
+                            const ilce = row.dataset.ilce;
+                            const mahalle = row.dataset.mahalle;
+                            notesModal.classList.add('hidden');
+                            openEditModal(ilce, mahalle);
+                        });
+                    });
                 }
                 notesModal.classList.remove('hidden');
             }
 
             function downloadNotesExcel() {
-                const notedTasks = taskData.filter(task => task.not && task.not.trim() !== '');
+                const notedTasks = taskData.filter(task => task.not && task.not.trim() !== '').sort((a,b) => b.not_tarihi.localeCompare(a.not_tarihi));
                 const dataToExport = notedTasks.map(row => ({
                     'İlçe': row.ilce,
                     'Mahalle': row.mahalle,
