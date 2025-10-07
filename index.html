@@ -30,6 +30,12 @@
         .ilce-header.open .arrow {
             transform: rotate(180deg);
         }
+        @keyframes blink {
+            50% { opacity: 0; }
+        }
+        .animate-blink {
+            animation: blink 1.5s linear infinite;
+        }
     </style>
 </head>
 <body class="text-gray-800">
@@ -622,15 +628,24 @@
                 if (notedTasks.length === 0) {
                     notesTableBody.innerHTML = `<tr><td colspan="5" class="text-center p-8 text-gray-500">Not düşülen birim bulunamadı.</td></tr>`;
                 } else {
-                    notesTableBody.innerHTML = notedTasks.map(task => `
-                        <tr class="hover:bg-gray-50 cursor-pointer" data-ilce="${task.ilce}" data-mahalle="${task.mahalle}">
-                            <td class="px-6 py-4 whitespace-nowrap">${task.ilce}</td>
-                            <td class="px-6 py-4 whitespace-nowrap">${task.mahalle}</td>
-                            <td class="px-6 py-4 whitespace-nowrap">${task.personel}</td>
-                            <td class="px-6 py-4 whitespace-nowrap">${task.not_tarihi || '-'}</td>
-                            <td class="px-6 py-4 whitespace-normal text-sm text-gray-700">${task.not}</td>
-                        </tr>
-                    `).join('');
+                    notesTableBody.innerHTML = notedTasks.map(task => {
+                        const warningIcon = (task.not && !task.megsis) ? `
+                            <span class="inline-flex items-center ml-2 text-red-500 animate-blink" title="Megsis Onayı Bekliyor">
+                                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.21 3.03-1.742 3.03H4.42c-1.532 0-2.492-1.696-1.742-3.03l5.58-9.92zM10 13a1 1 0 110-2 1 1 0 010 2zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
+                                </svg>
+                            </span>` : '';
+                        
+                        return `
+                            <tr class="hover:bg-gray-50 cursor-pointer" data-ilce="${task.ilce}" data-mahalle="${task.mahalle}">
+                                <td class="px-6 py-4 whitespace-nowrap">${task.ilce}</td>
+                                <td class="px-6 py-4 whitespace-nowrap"><div class="flex items-center">${task.mahalle}${warningIcon}</div></td>
+                                <td class="px-6 py-4 whitespace-nowrap">${task.personel}</td>
+                                <td class="px-6 py-4 whitespace-nowrap">${task.not_tarihi || '-'}</td>
+                                <td class="px-6 py-4 whitespace-normal text-sm text-gray-700">${task.not}</td>
+                            </tr>
+                        `;
+                    }).join('');
 
                     document.querySelectorAll('#notes-table-body tr[data-ilce]').forEach(row => {
                         row.addEventListener('click', () => {
@@ -842,3 +857,4 @@
     </script>
 </body>
 </html>
+
