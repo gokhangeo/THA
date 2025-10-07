@@ -630,6 +630,7 @@
                           data-ilce="${task.ilce}" data-mahalle="${task.mahalle}">
                         <span class="text-xs font-semibold text-red-700">${task.ilce}</span>
                         <span class="font-bold">${task.mahalle}</span>
+                        <span class="text-xs text-red-600 lowercase">(${task.personel})</span>
                     </div>
                 `).join('');
 
@@ -730,9 +731,12 @@
             
             function generatePerformanceReport(period = 'all') {
                 const now = new Date();
-                const startOfWeek = new Date(now.setDate(now.getDate() - now.getDay() + 1)); 
+                const startOfWeek = new Date(now);
+                startOfWeek.setDate(startOfWeek.getDate() - (startOfWeek.getDay() + 6) % 7); // Monday
                 startOfWeek.setHours(0,0,0,0);
+                
                 const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+                startOfMonth.setHours(0,0,0,0);
 
                 const personeller = [...new Set(taskData.map(p => p.personel))].sort();
                 const stats = {};
@@ -741,24 +745,9 @@
                     const personTasks = taskData.filter(t => t.personel === p);
                     stats[p] = {
                         toplamGorev: personTasks.length,
-                        megsis: 0,
-                        netigma: 0,
-                        mudur: 0,
+                        megsis: 0, netigma: 0, mudur: 0,
                         tamamlanan: personTasks.filter(t => t.megsis && t.netigma && t.mudur).length
                     };
-                });
-
-                taskData.forEach(task => {
-                    let isInPeriod = false;
-                    if (period === 'all') {
-                        isInPeriod = true;
-                    } else if (period === 'week') {
-                        if ((task.megsis && new Date(task.megsis) >= startOfWeek) || (task.netigma && new Date(task.netigma) >= startOfWeek) || (task.mudur && new Date(task.mudur) >= startOfWeek)) {
-                           // This logic is complex. Let's just count entries in the period.
-                        }
-                    } else if (period === 'month') {
-                       // same
-                    }
                 });
 
                 personeller.forEach(p => {
