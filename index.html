@@ -74,7 +74,7 @@
             </header>
             
             <!-- Summary Cards -->
-            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-6 mb-6">
+            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6 mb-6">
                 <div id="performans-raporu-card" class="bg-white p-4 rounded-xl shadow text-center cursor-pointer hover:bg-gray-50 transition">
                     <h3 class="text-sm font-medium text-gray-500">Performans Raporu</h3>
                     <p class="mt-1 text-3xl font-semibold text-orange-500">📊</p>
@@ -90,6 +90,10 @@
                 <div id="megsis-card" class="bg-white p-4 rounded-xl shadow text-center cursor-pointer hover:bg-gray-50 transition">
                     <h3 class="text-sm font-medium text-gray-500">Megsis Onay</h3>
                     <p id="megsis-onay-count" class="mt-1 text-3xl font-semibold text-green-600">0</p>
+                </div>
+                <div id="netigma-bekleyen-card" class="bg-white p-4 rounded-xl shadow text-center cursor-pointer hover:bg-gray-50 transition">
+                    <h3 class="text-sm font-medium text-gray-500">Netigma Bekleyen</h3>
+                    <p id="netigma-bekleyen-count" class="mt-1 text-3xl font-semibold text-pink-600">0</p>
                 </div>
                 <div id="netigma-card" class="bg-white p-4 rounded-xl shadow text-center cursor-pointer hover:bg-gray-50 transition">
                     <h3 class="text-sm font-medium text-gray-500">Netigma Onay</h3>
@@ -341,6 +345,8 @@
             const closeGununOzetiModalBtn = document.getElementById('close-gunun-ozeti-modal-btn');
             const gununOzetiTableBody = document.getElementById('gunun-ozeti-table-body');
             const downloadGununOzetiExcelBtn = document.getElementById('download-gunun-ozeti-excel-btn');
+            const netigmaBekleyenCard = document.getElementById('netigma-bekleyen-card');
+            const netigmaBekleyenCountEl = document.getElementById('netigma-bekleyen-count');
             const mefsisBekleyenlerContainer = document.getElementById('megsis-bekleyenler-container');
             const mefsisBekleyenlerListesi = document.getElementById('megsis-bekleyenler-listesi');
             const notesModal = document.getElementById('notes-modal');
@@ -500,6 +506,7 @@
                 const netigmaOnay = dataToScan.filter(task => task.netigma).length;
                 const mudurOnay = dataToScan.filter(task => task.mudur).length;
                 const notDüşülenler = dataToScan.filter(task => task.not && task.not.trim() !== '').length;
+                const netigmaBekleyen = dataToScan.filter(task => task.megsis && !task.netigma).length;
                 const gununOlaylari = taskData.filter(task => task.megsis === todayString || task.netigma === todayString || task.mudur === todayString || task.not_tarihi === todayString).length;
 
                 toplamMahalleCountEl.textContent = ilceFilter.value === 'Tümü' ? taskData.length : toplamMahalle;
@@ -507,6 +514,7 @@
                 netigmaOnayCountEl.textContent = netigmaOnay;
                 mudurOnayCountEl.textContent = mudurOnay;
                 notCountEl.textContent = notDüşülenler;
+                netigmaBekleyenCountEl.textContent = netigmaBekleyen;
                 gununOzetiCountEl.textContent = gununOlaylari;
             }
 
@@ -800,7 +808,7 @@
 
 
             function renderNotesModal() {
-                const notedTasks = taskData.filter(task => task.not && task.not.trim() !== '').sort((a,b) => b.not_tarihi.localeCompare(a.not_tarihi));
+                const notedTasks = taskData.filter(task => task.not && task.not.trim() !== '').sort((a,b) => (b.not_tarihi || '').localeCompare(a.not_tarihi || ''));
                 notesTableBody.innerHTML = '';
                 if (notedTasks.length === 0) {
                     notesTableBody.innerHTML = `<tr><td colspan="5" class="text-center p-8 text-gray-500">Not düşülen birim bulunamadı.</td></tr>`;
@@ -826,7 +834,7 @@
             }
 
             function downloadNotesExcel() {
-                const notedTasks = taskData.filter(task => task.not && task.not.trim() !== '').sort((a,b) => b.not_tarihi.localeCompare(a.not_tarihi));
+                const notedTasks = taskData.filter(task => task.not && task.not.trim() !== '').sort((a,b) => (b.not_tarihi || '').localeCompare(a.not_tarihi || ''));
                 const dataToExport = notedTasks.map(row => ({
                     'İlçe': row.ilce, 'Mahalle': row.mahalle, 'Görevli Personel': row.personel, 'Not Tarihi': row.not_tarihi, 'Not': row.not
                 }));
@@ -840,23 +848,39 @@
             }
             
             function openApprovalModal(approvalType) {
-                let title = '', header = '';
+                let title = '', header = '', approvedTasks;
                 switch (approvalType) {
-                    case 'megsis': title = 'Megsis Onayı Olan Birimler'; header = 'Megsis Onay Tarihi'; break;
-                    case 'netigma': title = 'Netigma Onayı Olan Birimler'; header = 'Netigma Onay Tarihi'; break;
-                    case 'mudur': title = 'Müdür Onayı Olan Birimler'; header = 'Müdür Onay Tarihi'; break;
+                    case 'megsis':
+                        title = 'Megsis Onayı Olan Birimler';
+                        header = 'Megsis Onay Tarihi';
+                        approvedTasks = currentDisplayData.filter(task => task.megsis).sort((a, b) => b.megsis.localeCompare(a.megsis));
+                        break;
+                    case 'netigmaBekleyen':
+                        title = 'Netigma Onayı Bekleyenler';
+                        header = 'Megsis Onay Tarihi';
+                        approvedTasks = currentDisplayData.filter(task => task.megsis && !task.netigma).sort((a, b) => b.megsis.localeCompare(a.megsis));
+                        break;
+                    case 'netigma':
+                        title = 'Netigma Onayı Olan Birimler';
+                        header = 'Netigma Onay Tarihi';
+                        approvedTasks = currentDisplayData.filter(task => task.netigma).sort((a, b) => b.netigma.localeCompare(a.netigma));
+                        break;
+                    case 'mudur':
+                        title = 'Müdür Onayı Olan Birimler';
+                        header = 'Müdür Onay Tarihi';
+                        approvedTasks = currentDisplayData.filter(task => task.mudur).sort((a, b) => b.mudur.localeCompare(a.mudur));
+                        break;
                 }
                 approvalModalTitle.textContent = title;
                 approvalDateHeader.textContent = header;
 
-                const approvedTasks = currentDisplayData.filter(task => task[approvalType]);
                 
-                approvalTableBody.innerHTML = approvedTasks.length === 0 ? `<tr><td colspan="4" class="text-center p-8 text-gray-500">Bu onaya sahip birim bulunamadı.</td></tr>` : approvedTasks.map(task => `
+                approvalTableBody.innerHTML = approvedTasks.length === 0 ? `<tr><td colspan="4" class="text-center p-8 text-gray-500">Bu kritere uygun birim bulunamadı.</td></tr>` : approvedTasks.map(task => `
                     <tr class="hover:bg-gray-50 cursor-pointer" data-task-ilce="${task.ilce}" data-task-mahalle="${task.mahalle}">
                         <td class="px-6 py-4 whitespace-nowrap">${task.ilce}</td>
                         <td class="px-6 py-4 whitespace-nowrap">${task.mahalle}</td>
                         <td class="px-6 py-4 whitespace-nowrap">${task.personel}</td>
-                        <td class="px-6 py-4 whitespace-nowrap">${task[approvalType]}</td>
+                        <td class="px-6 py-4 whitespace-nowrap">${task[approvalType === 'netigmaBekleyen' ? 'megsis' : approvalType]}</td>
                     </tr>
                 `).join('');
 
@@ -979,6 +1003,7 @@
                 downloadNotesExcelBtn.addEventListener('click', downloadNotesExcel);
                 
                 megsisCard.addEventListener('click', () => openApprovalModal('megsis'));
+                netigmaBekleyenCard.addEventListener('click', () => openApprovalModal('netigmaBekleyen'));
                 netigmaCard.addEventListener('click', () => openApprovalModal('netigma'));
                 mudurCard.addEventListener('click', () => openApprovalModal('mudur'));
                 closeApprovalModalBtn.addEventListener('click', () => approvalModal.classList.add('hidden'));
