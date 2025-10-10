@@ -3,545 +3,957 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Uygulama Portalı</title>
+    <title>Mersin İli THA Sistemi</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Chart.js Datalabels Plugin -->
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
     <style>
         body {
             font-family: 'Inter', sans-serif;
-            transition: background-color 0.3s, color 0.3s;
+            background-color: #f3f4f6;
         }
-        /* Özel scrollbar stilleri */
-        ::-webkit-scrollbar { width: 8px; }
-        ::-webkit-scrollbar-track { background: #1f2937; }
-        ::-webkit-scrollbar-thumb { background: #4b5563; border-radius: 10px; }
-        ::-webkit-scrollbar-thumb:hover { background: #6b7280; }
-
-        /* Light Tema Stilleri */
-        html.light body { background-color: #f3f4f6; color: #111827; }
-        html.light ::-webkit-scrollbar-track { background: #e5e7eb; }
-        html.light ::-webkit-scrollbar-thumb { background: #9ca3af; }
-        html.light .card, html.light .category-card, html.light .modal-content { background-color: #ffffff; border-color: #e5e7eb; }
-        html.light .text-header { color: #1f2937; }
-        html.light .text-subheader { color: #4b5563; }
-        html.light .card:hover, html.light .category-card:hover { box-shadow: 0 4px_6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06); }
-        html.light .footer-text { color: #6b7280; }
-        html.light .modal-bg { background-color: rgba(0, 0, 0, 0.5); }
-        
-        /* Not Defteri Stilleri */
-        .note-item {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 1rem;
-            border-radius: 0.75rem;
-            background-color: #374151; /* bg-gray-700 */
-            margin-bottom: 0.75rem;
-            transition: background-color 0.2s;
+        .table-container {
+            max-height: 60vh;
+            overflow-y: auto;
+            overflow-x: auto;
         }
-        .note-item:hover {
-            background-color: #4b5563; /* bg-gray-600 */
+        .table-container::-webkit-scrollbar { width: 8px; height: 8px; }
+        .table-container::-webkit-scrollbar-track { background: #f1f1f1; }
+        .table-container::-webkit-scrollbar-thumb { background: #888; border-radius: 4px; }
+        .table-container::-webkit-scrollbar-thumb:hover { background: #555; }
+        th .sort-icon { opacity: 0.3; transition: opacity 0.2s; }
+        th:hover .sort-icon { opacity: 0.7; }
+        th .sort-icon.active { opacity: 1; color: #2563eb; }
+        .tab-btn {
+            padding: 0.75rem 1.5rem;
+            font-weight: 600;
+            border-bottom: 3px solid transparent;
+            transition: all 0.3s;
         }
-        html.light .note-item { background-color: #f3f4f6; } /* bg-gray-100 */
-        html.light .note-item:hover { background-color: #e5e7eb; } /* bg-gray-200 */
-
-        /* Responsive adjustments */
-        @media (max-width: 768px) {
-            .card-grid {
-                grid-template-columns: repeat(2, minmax(0, 1fr));
-            }
-            .modal-content {
-                padding: 1.5rem;
-                overflow-y: auto;
-                -webkit-overflow-scrolling: touch;
-            }
-            .modal-bg {
-                align-items: flex-start;
-                padding-top: 2rem;
-            }
+        .tab-btn.active {
+            color: #2563eb;
+            border-bottom-color: #2563eb;
+        }
+        #task-table tr {
+            cursor: pointer;
         }
     </style>
 </head>
-<body class="bg-gray-900 text-white antialiased">
+<body class="text-gray-800">
 
-    <!-- Ana Konteyner -->
-    <div class="container mx-auto px-4 py-8 md:py-12">
+    <!-- Login Screen -->
+    <div id="login-screen" class="flex items-center justify-center min-h-screen bg-gradient-to-br from-blue-100 to-gray-100">
+        <div class="w-full max-w-md p-8 space-y-6 bg-white rounded-xl shadow-2xl">
+            <h2 class="text-3xl font-bold text-center text-gray-700">THA SİSTEMİ</h2>
+            <p class="text-center text-gray-500">Devam etmek için lütfen giriş yapın.</p>
+            <form id="login-form" class="space-y-6">
+                <div>
+                    <input id="username" type="text" required class="w-full px-4 py-2 text-gray-700 bg-gray-100 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Kullanıcı Adı">
+                </div>
+                <div>
+                    <input id="password" type="password" required class="w-full px-4 py-2 text-gray-700 bg-gray-100 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Şifre">
+                </div>
+                <div id="error-message" class="text-red-500 text-sm text-center hidden">Hatalı kullanıcı adı veya şifre.</div>
+                <div>
+                    <button type="submit" class="w-full px-4 py-2 font-bold text-white bg-green-600 rounded-lg hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-opacity-50">
+                        Giriş Yap
+                    </button>
+                </div>
+            </form>
+             <p class="text-center text-xs text-gray-400">© Gökhan ELGÜL tarafından tasarlanmıştır.</p>
+        </div>
+    </div>
 
-        <!-- Üst Bilgi Alanı: Saat, Tarih ve Tema Butonu -->
-        <div class="flex justify-between items-center mb-8">
-            <div id="live-info" class="text-lg font-medium text-subheader">
-                <span id="time"></span>
-                <span class="mx-2">|</span>
-                <span id="date"></span>
-            </div>
-            <button id="theme-toggle" class="p-2 rounded-full bg-gray-700 hover:bg-gray-600 transition-colors">
-                <!-- Ikonlar JavaScript ile değiştirilecek -->
-            </button>
+    <!-- Main Application -->
+    <div id="main-app" class="hidden">
+        <div class="bg-white shadow-md">
+            <nav class="container mx-auto flex">
+                <button id="analiz-tab-btn" class="tab-btn active">THA Analizi</button>
+                <button id="takip-tab-btn" class="tab-btn">İş Takip</button>
+            </nav>
         </div>
 
-        <!-- Başlık Bölümü -->
-        <header class="text-center mb-10">
-            <h1 class="text-4xl md:text-5xl font-bold mb-2 bg-gradient-to-r from-purple-400 to-indigo-500 text-transparent bg-clip-text">
-                Uygulama Merkezi
-            </h1>
-        </header>
-
-        <!-- Kategori Kartları -->
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
-             <div id="open-tkgm-modal" class="category-card card bg-gray-800 p-6 rounded-2xl shadow-lg flex flex-col justify-center items-center text-center cursor-pointer transform hover:-translate-y-2 transition-all duration-300 hover:shadow-blue-500/50 space-y-3">
-                <div class="bg-blue-500 p-3 rounded-xl"><svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 14v3m4-3v3m4-3v3M3 21h18M3 10h18M3 7l9-4 9 4M4 10h16v11H4V10z"></path></svg></div>
-                <div>
-                    <h2 class="text-xl md:text-2xl font-bold text-header">TKGM Sistemleri</h2>
-                    <p class="text-subheader mt-2 text-sm md:text-base">Resmi kurum uygulamaları</p>
-                </div>
+        <!-- THA Analiz Page -->
+        <div id="analiz-page" class="container mx-auto p-4 md:p-8">
+            <header class="text-center mb-8">
+                <h1 class="text-3xl md:text-4xl font-bold text-gray-700">MERSİN İLİ THA ANALİZİ</h1>
+                <p class="text-gray-500 mt-2">İlçe seçerek arazi niteliklerini arayın, filtreleyin ve özet bilgileri görüntüleyin.</p>
+            </header>
+            <div class="mb-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6 items-end">
+                 <div class="bg-white p-4 rounded-xl shadow-md"><label for="ilce-select" class="block text-sm font-medium text-gray-600 mb-2">İlçe Seçin:</label><select id="ilce-select" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition" disabled></select></div>
+                 <div class="bg-white p-4 rounded-xl shadow-md"><label for="search-input" class="block text-sm font-medium text-gray-600 mb-2">Nitelik Ara:</label><input type="text" id="search-input" placeholder="Örn: Orman..." class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition" disabled></div>
+                 <div class="sm:col-span-1 bg-white p-4 rounded-xl shadow-md flex flex-col justify-center text-center"><h3 class="text-lg font-semibold text-blue-600">Seçili Alan Dağılımı</h3><div class="mt-2"><span class="text-sm text-green-600">Ekonomik Değeri Olan</span><p id="ekonomik-var-ilce-toplam" class="text-xl font-bold text-gray-800">0 m²</p></div><div class="mt-2 border-t pt-2"><span class="text-sm text-red-600">Ekonomik Değeri Olmayan</span><p id="ekonomik-yok-ilce-toplam" class="text-xl font-bold text-gray-800">0 m²</p></div></div>
+                 <div class="sm:col-span-1 bg-white p-4 rounded-xl shadow-md flex flex-col justify-center text-center"><h3 id="toplam-kart-baslik" class="text-lg font-semibold text-indigo-600">Mersin Genel Toplam</h3><p id="genel-toplam" class="text-2xl font-bold text-gray-800 mt-2">0 m²</p></div>
+                 <div class="sm:col-span-2 lg:col-span-1 bg-white p-4 rounded-xl shadow-md flex flex-col justify-center text-center space-y-2"><button id="toggle-chart" class="w-full bg-blue-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-blue-700" disabled>Grafikleri Göster/Gizle</button><button id="download-excel" class="w-full bg-green-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-green-700" disabled>Excel Olarak İndir</button></div>
             </div>
-            <div id="open-projects-modal" class="category-card card bg-gray-800 p-6 rounded-2xl shadow-lg flex flex-col justify-center items-center text-center cursor-pointer transform hover:-translate-y-2 transition-all duration-300 hover:shadow-purple-500/50 space-y-3">
-                 <div class="bg-purple-500 p-3 rounded-xl"><svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"></path></svg></div>
-                 <div>
-                    <h2 class="text-xl md:text-2xl font-bold text-header">Kişisel Projeler</h2>
-                    <p class="text-subheader mt-2 text-sm md:text-base">Geliştirilen özel araçlar</p>
-                 </div>
-            </div>
-            <div id="open-other-modal" class="category-card card bg-gray-800 p-6 rounded-2xl shadow-lg flex flex-col justify-center items-center text-center cursor-pointer transform hover:-translate-y-2 transition-all duration-300 hover:shadow-yellow-500/50 space-y-3">
-                <div class="bg-yellow-500 p-3 rounded-xl"><svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"></path></svg></div>
-                <div>
-                    <h2 class="text-xl md:text-2xl font-bold text-header">Diğer Uygulamalar</h2>
-                    <p class="text-subheader mt-2 text-sm md:text-base">Sosyal medya ve sık kullanılanlar</p>
-                </div>
-            </div>
+            <div id="chart-container" class="bg-white rounded-xl shadow-md p-4 mb-6 hidden"><div class="grid grid-cols-1 lg:grid-cols-2 gap-6 items-center"><div class="relative h-96"><h2 class="text-xl font-bold text-center text-gray-700 mb-4">Nitelik Bazlı Alan Dağılımı</h2><canvas id="nitelikBarChart"></canvas></div><div class="relative h-96"><h2 class="text-xl font-bold text-center text-gray-700 mb-4">İlçe Bazlı Karşılaştırma</h2><canvas id="ilceBarChart"></canvas></div></div></div>
+            <div class="bg-white rounded-xl shadow-md overflow-hidden"><div class="table-container"><table class="min-w-full divide-y divide-gray-200"><thead class="bg-gray-100 sticky top-0"><tr><th class="px-6 py-3 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">Nitelik</th><th class="px-6 py-3 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">Kod</th><th class="px-6 py-3 text-right text-xs font-bold text-gray-600 uppercase tracking-wider cursor-pointer" data-sort-by="adet"><div class="flex items-center justify-end"><span>Adet</span><svg class="w-4 h-4 ml-1 sort-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8 9l4-4 4 4m0 6l-4 4-4-4"></path></svg></div></th><th class="px-6 py-3 text-left text-xs font-bold text-gray-600 uppercase tracking-wider cursor-pointer" data-sort-by="ekonomikDegeri"><div class="flex items-center"><span>Ekonomik Değeri</span><svg class="w-4 h-4 ml-1 sort-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8 9l4-4 4 4m0 6l-4 4-4-4"></path></svg></div></th><th class="px-6 py-3 text-right text-xs font-bold text-gray-600 uppercase tracking-wider cursor-pointer" data-sort-by="yuzolcumM2"><div class="flex items-center justify-end"><span>Yüzölçüm (m²)</span><svg class="w-4 h-4 ml-1 sort-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8 9l4-4 4 4m0 6l-4 4-4-4"></path></svg></div></th><th class="px-6 py-3 text-right text-xs font-bold text-gray-600 uppercase tracking-wider cursor-pointer" data-sort-by="yuzolcumHa"><div class="flex items-center justify-end"><span>Yüzölçüm (ha)</span><svg class="w-4 h-4 ml-1 sort-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8 9l4-4 4 4m0 6l-4 4-4-4"></path></svg></div></th></tr></thead><tbody id="data-table" class="bg-white divide-y divide-gray-200"><tr><td colspan="6" class="px-6 py-12 text-center text-gray-500"><div id="loading-state-analiz">Veriler yükleniyor...</div></td></tr></tbody></table></div></div>
         </div>
         
-        <!-- Footer -->
-        <footer class="text-center mt-12 footer-text">
-            <p>© Gökhan ELGÜL tarafından tasarlanmıştır.</p>
-        </footer>
-    </div>
+        <!-- İş Takip Page -->
+        <div id="takip-page" class="container mx-auto p-4 md:p-8 hidden">
+             <header class="text-center mb-8">
+                <h1 class="text-3xl md:text-4xl font-bold text-gray-800">THA İŞ TAKİP SİSTEMİ</h1>
+                <p class="text-gray-600 mt-2">Personel bazlı MEGSİS ve NETİGMA giriş takibi.</p>
+            </header>
+            
+            <!-- Summary Cards -->
+            <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-6 mb-6">
+                <div class="bg-white p-4 rounded-xl shadow text-center">
+                    <h3 class="text-sm font-medium text-gray-500">Toplam Mahalle</h3>
+                    <p id="toplam-mahalle-count" class="mt-1 text-3xl font-semibold text-gray-900">0</p>
+                </div>
+                <div id="megsis-card" class="bg-white p-4 rounded-xl shadow text-center cursor-pointer hover:bg-gray-50 transition">
+                    <h3 class="text-sm font-medium text-gray-500">Megsis Onay</h3>
+                    <p id="megsis-onay-count" class="mt-1 text-3xl font-semibold text-green-600">0</p>
+                </div>
+                <div id="netigma-card" class="bg-white p-4 rounded-xl shadow text-center cursor-pointer hover:bg-gray-50 transition">
+                    <h3 class="text-sm font-medium text-gray-500">Netigma Onay</h3>
+                    <p id="netigma-onay-count" class="mt-1 text-3xl font-semibold text-blue-600">0</p>
+                </div>
+                <div id="mudur-card" class="bg-white p-4 rounded-xl shadow text-center cursor-pointer hover:bg-gray-50 transition">
+                    <h3 class="text-sm font-medium text-gray-500">Müdür Onay</h3>
+                    <p id="mudur-onay-count" class="mt-1 text-3xl font-semibold text-purple-600">0</p>
+                </div>
+                <div id="not-card" class="bg-white p-4 rounded-xl shadow text-center cursor-pointer hover:bg-gray-50 transition">
+                    <h3 class="text-sm font-medium text-gray-500">Not Düşülenler</h3>
+                    <p id="not-count" class="mt-1 text-3xl font-semibold text-yellow-500">0</p>
+                </div>
+            </div>
 
-    <!-- Modallar -->
-    <!-- TKGM Modal -->
-    <div id="tkgm-modal" class="modal-bg fixed inset-0 flex items-center justify-center p-4 hidden z-50 transition-opacity duration-300">
-        <div class="modal-content bg-gray-800 rounded-2xl shadow-2xl w-full max-w-4xl p-6 md:p-8 relative transform scale-95 transition-transform duration-300" style="max-height: 90vh;">
-            <button class="close-modal-btn absolute top-4 right-4 text-gray-500 hover:text-white transition-colors text-3xl leading-none z-10">&times;</button>
-            <h2 class="text-2xl md:text-3xl font-bold text-center mb-8 text-header">TKGM Sistemleri</h2>
-            <section id="group-tkgm" class="overflow-y-auto">
-                <main class="card-grid grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
-                    <a id="ebys" href="https://ebys.tkgm.gov.tr/edys-web/sistemeGiris.xhtml" target="_blank" rel="noopener noreferrer" class="card bg-gray-700 rounded-xl shadow-lg hover:shadow-gray-500/50 transform hover:-translate-y-1 transition-all duration-300 ease-in-out p-4 flex items-center space-x-3"><div class="bg-gray-500 p-2 rounded-lg"><svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg></div><div><h2 class="text-lg font-semibold text-header">EBYS</h2><p class="text-sm text-subheader">Elektronik Belge Yönetim Sistemi</p></div></a>
-                    <a id="bulut" href="https://bulut.tkgm.gov.tr/" target="_blank" rel="noopener noreferrer" class="card bg-gray-700 rounded-xl shadow-lg hover:shadow-cyan-400/50 transform hover:-translate-y-1 transition-all duration-300 ease-in-out p-4 flex items-center space-x-3"><div class="bg-cyan-400 p-2 rounded-lg"><svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 15a4 4 0 004 4h9a5 5 0 10-.1-9.999 5.002 5.002 0 10-9.78 2.096A4.001 4.001 0 003 15z"></path></svg></div><div><h2 class="text-lg font-semibold text-header">BULUT</h2><p class="text-sm text-subheader">TKGM Bulut</p></div></a>
-                    <a id="cbs" href="https://cbs.tkgm.gov.tr/login.aspx" target="_blank" rel="noopener noreferrer" class="card bg-gray-700 rounded-xl shadow-lg hover:shadow-green-500/50 transform hover:-translate-y-1 transition-all duration-300 ease-in-out p-4 flex items-center space-x-3"><div class="bg-green-500 p-2 rounded-lg"><svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9V3m0 18a9 9 0 009-9m-9 9a9 9 0 00-9-9"></path></svg></div><div><h2 class="text-lg font-semibold text-header">CBS</h2><p class="text-sm text-subheader">Coğrafi Bilgi Sistemi</p></div></a>
-                    <a id="tkgm" href="https://www.tkgm.gov.tr/" target="_blank" rel="noopener noreferrer" class="card bg-gray-700 rounded-xl shadow-lg hover:shadow-blue-500/50 transform hover:-translate-y-1 transition-all duration-300 ease-in-out p-4 flex items-center space-x-3"><div class="bg-blue-500 p-2 rounded-lg"><svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 14v3m4-3v3m4-3v3M3 21h18M3 10h18M3 7l9-4 9 4M4 10h16v11H4V10z"></path></svg></div><div><h2 class="text-lg font-semibold text-header">TKGM</h2><p class="text-sm text-subheader">Tapu ve Kadastro Gn. Md.</p></div></a>
-                    <a id="ybs" href="https://ybs.tkgm.gov.tr/" target="_blank" rel="noopener noreferrer" class="card bg-gray-700 rounded-xl shadow-lg hover:shadow-yellow-500/50 transform hover:-translate-y-1 transition-all duration-300 ease-in-out p-4 flex items-center space-x-3"><div class="bg-yellow-500 p-2 rounded-lg"><svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 3.055A9.001 9.001 0 1020.945 13H11V3.055z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.488 9H15V3.512A9.025 9.025 0 0120.488 9z"></path></svg></div><div><h2 class="text-lg font-semibold text-header">YBS</h2><p class="text-sm text-subheader">Yönetim Bilgi Sistemi</p></div></a>
-                    <a id="yts" href="https://yts.tkgm.gov.tr/" target="_blank" rel="noopener noreferrer" class="card bg-gray-700 rounded-xl shadow-lg hover:shadow-red-500/50 transform hover:-translate-y-1 transition-all duration-300 ease-in-out p-4 flex items-center space-x-3"><div class="bg-red-500 p-2 rounded-lg"><svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path></svg></div><div><h2 class="text-lg font-semibold text-header">YTS</h2><p class="text-sm text-subheader">Yatırım Takip Sistemi</p></div></a>
-                    <a id="thagis" href="https://thagis.tkgm.gov.tr/TKGM" target="_blank" rel="noopener noreferrer" class="card bg-gray-700 rounded-xl shadow-lg hover:shadow-teal-500/50 transform hover:-translate-y-1 transition-all duration-300 ease-in-out p-4 flex items-center space-x-3"><div class="bg-teal-500 p-2 rounded-lg"><svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L15 9l-2.053 2.053a1 1 0 01-1.414 0L9 9v11zM15 20l5.447-2.724A1 1 0 0021 16.382V5.618a1 1 0 00-1.447-.894L15 9l2.053 2.053a1 1 0 001.414 0L21 9v-2.382l-6 3-6-3v2.382l6 3 6-3v-2.382l-6 3-6-3v11l6-3z"></path></svg></div><div><h2 class="text-lg font-semibold text-header">Netigma</h2><p class="text-sm text-subheader">THA Bilgi Sistemi</p></div></a>
-                    <a id="webmail" href="https://webposta.tkgm.gov.tr/owa/auth/logon.aspx?replaceCurrent=1&url=https%3a%2f%2fwebposta.tkgm.gov.tr%2fowa" target="_blank" rel="noopener noreferrer" class="card bg-gray-700 rounded-xl shadow-lg hover:shadow-orange-500/50 transform hover:-translate-y-1 transition-all duration-300 ease-in-out p-4 flex items-center space-x-3"><div class="bg-orange-500 p-2 rounded-lg"><svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg></div><div><h2 class="text-lg font-semibold text-header">Web-Mail</h2><p class="text-sm text-subheader">TKGM E-Posta</p></div></a>
-                </main>
-            </section>
-        </div>
-    </div>
-
-    <!-- Projects Modal -->
-    <div id="projects-modal" class="modal-bg fixed inset-0 flex items-center justify-center p-4 hidden z-50 transition-opacity duration-300">
-        <div class="modal-content bg-gray-800 rounded-2xl shadow-2xl w-full max-w-4xl p-6 md:p-8 relative transform scale-95 transition-transform duration-300" style="max-height: 90vh;">
-            <button class="close-modal-btn absolute top-4 right-4 text-gray-500 hover:text-white transition-colors text-3xl leading-none z-10">&times;</button>
-            <h2 class="text-2xl md:text-3xl font-bold text-center mb-8 text-header">Kişisel Projeler</h2>
-             <section id="group-projects" class="overflow-y-auto">
-                <main class="card-grid grid grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
-                    <a id="megsis" href="https://gokhangeo.github.io/istakip/" target="_blank" rel="noopener noreferrer" class="card bg-gray-700 rounded-xl shadow-lg hover:shadow-indigo-500/50 transform hover:-translate-y-1 transition-all duration-300 ease-in-out p-4 flex items-center space-x-3"><div class="bg-indigo-500 p-2 rounded-lg"><svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"></path></svg></div><div><h2 class="text-lg font-semibold text-header">MEGSİS</h2><p class="text-sm text-subheader">İşlem Süreçleri</p></div></a>
-                    <a id="tkmevzuat" href="https://gokhangeo.github.io/tkmevzuat/" target="_blank" rel="noopener noreferrer" class="card bg-gray-700 rounded-xl shadow-lg hover:shadow-purple-500/50 transform hover:-translate-y-1 transition-all duration-300 ease-in-out p-4 flex items-center space-x-3"><div class="bg-purple-500 p-2 rounded-lg"><svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v11.494m-9-5.747h18"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20.253H6.5a2.5 2.5 0 01-2.5-2.5V6.253a2.5 2.5 0 012.5-2.5H10m4 0h3.5a2.5 2.5 0 012.5 2.5v11.494a2.5 2.5 0 01-2.5 2.5H14"></path></svg></div><div><h2 class="text-lg font-semibold text-header">TK Mevzuat</h2><p class="text-sm text-subheader">Mevzuat ve yönetmelikler</p></div></a>
-                    <a id="mersinistakip" href="https://gokhangeo.github.io/mersinistakip/" target="_blank" rel="noopener noreferrer" class="card bg-gray-700 rounded-xl shadow-lg hover:shadow-sky-500/50 transform hover:-translate-y-1 transition-all duration-300 ease-in-out p-4 flex items-center space-x-3"><div class="bg-sky-500 p-2 rounded-lg"><svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path></svg></div><div><h2 class="text-lg font-semibold text-header">İhale/Müdürlük Çalışmaları</h2><p class="text-sm text-subheader">22-a, 2B</p></div></a>
-                    <a id="isyonetim" href="https://gokhangeo.github.io/isyonetim/" target="_blank" rel="noopener noreferrer" class="card bg-gray-700 rounded-xl shadow-lg hover:shadow-emerald-500/50 transform hover:-translate-y-1 transition-all duration-300 ease-in-out p-4 flex items-center space-x-3"><div class="bg-emerald-500 p-2 rounded-lg"><svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg></div><div><h2 class="text-lg font-semibold text-header">İş Yönetim</h2><p class="text-sm text-subheader">Başvuru İş Dağılımı</p></div></a>
-                    <a id="mersinth" href="https://gokhangeo.github.io/THA/" target="_blank" rel="noopener noreferrer" class="card bg-gray-700 rounded-xl shadow-lg hover:shadow-rose-500/50 transform hover:-translate-y-1 transition-all duration-300 ease-in-out p-4 flex items-center space-x-3"><div class="bg-rose-500 p-2 rounded-lg"><svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h6m-6 4h6m-6 4h6"></path></svg></div><div><h2 class="text-lg font-semibold text-header">Mersin TH</h2><p class="text-sm text-subheader">Tescil Harici Alanlar</p></div></a>
-                    <a id="mersinnorm" href="https://gokhangeo.github.io/mersin-norm/" target="_blank" rel="noopener noreferrer" class="card bg-gray-700 rounded-xl shadow-lg hover:shadow-amber-500/50 transform hover:-translate-y-1 transition-all duration-300 ease-in-out p-4 flex items-center space-x-3"><div class="bg-amber-500 p-2 rounded-lg"><svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 6l3 1m0 0l-3 9a5.002 5.002 0 006.001 0M6 7l3 9M6 7l6-2m6 2l-3-1m-3 1l-3 9"></path></svg></div><div><h2 class="text-lg font-semibold text-header">Mersin Norm</h2><p class="text-sm text-subheader">Norm kadro işlemleri</p></div></a>
-                    <a id="evraktakip" href="https://gokhangeo.github.io/evraktakip/" target="_blank" rel="noopener noreferrer" class="card bg-gray-700 rounded-xl shadow-lg hover:shadow-teal-500/50 transform hover:-translate-y-1 transition-all duration-300 ease-in-out p-4 flex items-center space-x-3"><div class="bg-teal-500 p-2 rounded-lg"><svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"></path></svg></div><div><h2 class="text-lg font-semibold text-header">Evrak Takip</h2><p class="text-sm text-subheader">Belge ve evrak yönetimi</p></div></a>
-                    <a id="personelmesai" href="https://gokhangeo.github.io/personelmesai/" target="_blank" rel="noopener noreferrer" class="card bg-gray-700 rounded-xl shadow-lg hover:shadow-cyan-500/50 transform hover:-translate-y-1 transition-all duration-300 ease-in-out p-4 flex items-center space-x-3"><div class="bg-cyan-500 p-2 rounded-lg"><svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg></div><div><h2 class="text-lg font-semibold text-header">Personel Mesai</h2><p class="text-sm text-subheader">Çalışma saatleri takibi</p></div></a>
-                    <a id="asistan" href="https://gokhangeo.github.io/asistan/" target="_blank" rel="noopener noreferrer" class="card bg-gray-700 rounded-xl shadow-lg hover:shadow-pink-500/50 transform hover:-translate-y-1 transition-all duration-300 ease-in-out p-4 flex items-center space-x-3"><div class="bg-pink-500 p-2 rounded-lg"><svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z"></path></svg></div><div><h2 class="text-lg font-semibold text-header">Asistan</h2><p class="text-sm text-subheader">Kişisel dijital asistan</p></div></a>
-                    <a id="telafi" href="https://gokhangeo.github.io/telafi/" target="_blank" rel="noopener noreferrer" class="card bg-gray-700 rounded-xl shadow-lg hover:shadow-lime-500/50 transform hover:-translate-y-1 transition-all duration-300 ease-in-out p-4 flex items-center space-x-3"><div class="bg-lime-500 p-2 rounded-lg"><svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7h6m-8 4h10M9 15h.01M5 21h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v14a2 2 0 002 2z"></path></svg></div><div><h2 class="text-lg font-semibold text-header">Bilirkişilik</h2><p class="text-sm text-subheader">Mesai Telafi</p></div></a>
-                     <a id="butce" href="https://gokhangeo.github.io/hesap/" target="_blank" rel="noopener noreferrer" class="card bg-gray-700 rounded-xl shadow-lg hover:shadow-emerald-500/50 transform hover:-translate-y-1 transition-all duration-300 ease-in-out p-4 flex items-center space-x-3"><div class="bg-emerald-500 p-2 rounded-lg"><svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 17h8m0 0V9m0 8l-8-8-4 4-6-6"></path></svg></div><div><h2 class="text-lg font-semibold text-header">Bütçe</h2><p class="text-sm text-subheader">Kişisel Hesap</p></div></a>
-                     <a id="not" href="https://gokhangeo.github.io/NOT/" target="_blank" rel="noopener noreferrer" class="card bg-gray-700 rounded-xl shadow-lg hover:shadow-fuchsia-500/50 transform hover:-translate-y-1 transition-all duration-300 ease-in-out p-4 flex items-center space-x-3"><div class="bg-fuchsia-500 p-2 rounded-lg"><svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg></div><div><h2 class="text-lg font-semibold text-header">NOT</h2><p class="text-sm text-subheader">Kişisel Notlar</p></div></a>
-                </main>
-            </section>
+            <div class="mb-6 grid grid-cols-1 md:grid-cols-4 gap-6 items-end">
+                <div class="bg-white p-4 rounded-xl shadow"><label for="takip-ilce-filter" class="block text-sm font-medium text-gray-700">İlçeye Göre Filtrele</label><select id="takip-ilce-filter" class="mt-1 block w-full py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"></select></div>
+                <div class="bg-white p-4 rounded-xl shadow"><label for="takip-mahalle-filter" class="block text-sm font-medium text-gray-700">Mahalleye Göre Filtrele</label><select id="takip-mahalle-filter" class="mt-1 block w-full py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"></select></div>
+                <div class="bg-white p-4 rounded-xl shadow"><label for="takip-personel-filter" class="block text-sm font-medium text-gray-700">Personele Göre Filtrele</label><select id="takip-personel-filter" class="mt-1 block w-full py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"></select></div>
+                 <div class="bg-white p-4 rounded-xl shadow flex flex-col space-y-2">
+                    <button id="add-entry-btn" class="w-full bg-blue-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-blue-700">Yeni Giriş Ekle</button>
+                    <button id="download-takip-excel-btn" class="w-full bg-green-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-green-700">Tabloyu İndir</button>
+                </div>
+            </div>
+            <div class="mb-6 bg-white p-4 rounded-xl shadow">
+                <div class="flex justify-between items-center mb-4">
+                    <h2 id="personel-chart-title" class="text-xl font-semibold text-gray-700">Personel Giriş Sayıları</h2>
+                    <button id="download-chart-btn" class="bg-gray-200 text-gray-700 font-bold py-1 px-3 rounded-lg hover:bg-gray-300 text-sm">Grafiği İndir</button>
+                </div>
+                <div class="relative h-96"><canvas id="personelChart"></canvas></div>
+            </div>
+            <div class="bg-white rounded-xl shadow overflow-hidden"><div class="table-container"><table class="min-w-full divide-y divide-gray-200"><thead class="bg-gray-50"><tr><th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">İlçe</th><th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Mahalle</th><th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Görevli Personel</th><th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Megsis Onay</th><th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Netigma Onay</th><th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Müdür Onay</th><th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Not</th></tr></thead><tbody id="task-table" class="bg-white divide-y divide-gray-200"><tr><td colspan="7" class="text-center p-8 text-gray-500"><div id="loading-state-takip">Veriler yükleniyor...</div></td></tr></tbody></table></div></div>
         </div>
     </div>
     
-    <!-- Other/Social Modal -->
-    <div id="other-modal" class="modal-bg fixed inset-0 flex items-center justify-center p-4 hidden z-50 transition-opacity duration-300">
-         <div class="modal-content bg-gray-800 rounded-2xl shadow-2xl w-full max-w-4xl p-6 md:p-8 relative transform scale-95 transition-transform duration-300" style="max-height: 90vh;">
-            <button class="close-modal-btn absolute top-4 right-4 text-gray-500 hover:text-white transition-colors text-3xl leading-none z-10">&times;</button>
-            <h2 class="text-2xl md:text-3xl font-bold text-center mb-8 text-header">Sosyal Medya ve Araçlar</h2>
-            <div class="overflow-y-auto">
-                <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
-                    <a href="https://x.com" target="_blank" rel="noopener noreferrer" class="bg-gray-700 hover:bg-gray-600 p-4 rounded-xl flex flex-col items-center justify-center space-y-2 transition-all hover:scale-105"><svg class="w-8 h-8 text-white" fill="currentColor" viewBox="0 0 16 16"><path d="M12.6.75h2.454l-5.36 6.142L16 15.25h-4.937l-3.867-5.07-4.425 5.07H.316l5.733-6.57L0 .75h5.063l3.495 4.633L12.602.75Zm-2.267 12.95h1.506L5.032 2.15H3.436l6.9 11.55Z"></path></svg><span class="font-semibold text-header">X</span></a>
-                    <a href="https://youtube.com" target="_blank" rel="noopener noreferrer" class="bg-gray-700 hover:bg-gray-600 p-4 rounded-xl flex flex-col items-center justify-center space-y-2 transition-all hover:scale-105"><svg class="w-8 h-8 text-red-500" fill="currentColor" viewBox="0 0 24 24"><path d="M21.582,6.186C21.23,4.92,20.218,3.908,18.952,3.56C17.3,3.001,12,3,12,3S6.7,3.001,5.048,3.56 C3.782,3.908,2.77,4.92,2.418,6.186C1.999,7.844,2,12,2,12s-0.001,4.156,0.418,5.814c0.352,1.266,1.364,2.278,2.63,2.628 C6.7,21,12,21,12,21s5.3-0.001,6.952-0.558c1.266-0.35,2.278-1.362,2.63-2.628C22,16.156,22,12,22,12S22,7.844,21.582,6.186z M10,15.464V8.536L16,12L10,15.464z"></path></svg><span class="font-semibold text-header">YouTube</span></a>
-                    <a href="https://facebook.com" target="_blank" rel="noopener noreferrer" class="bg-gray-700 hover:bg-gray-600 p-4 rounded-xl flex flex-col items-center justify-center space-y-2 transition-all hover:scale-105"><svg class="w-8 h-8 text-blue-500" fill="currentColor" viewBox="0 0 24 24"><path d="M18,2H15a5,5,0,0,0-5,5v3H7v4h3v8h4V14h3l1-4H14V7a1,1,0,0,1,1-1h3Z"></path></svg><span class="font-semibold text-header">Facebook</span></a>
-                    <a href="https://gemini.google.com/" target="_blank" rel="noopener noreferrer" class="bg-gray-700 hover:bg-gray-600 p-4 rounded-xl flex flex-col items-center justify-center space-y-2 transition-all hover:scale-105"><svg class="w-8 h-8 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 2l3.09 6.26L22 9.27l-5 4.87L18.18 22 12 18.82 5.82 22 7 14.14 2 9.27l6.91-1.01L12 2z"></path></svg><span class="font-semibold text-header">Gemini</span></a>
-                    <a href="https://github.com/" target="_blank" rel="noopener noreferrer" class="bg-gray-700 hover:bg-gray-600 p-4 rounded-xl flex flex-col items-center justify-center space-y-2 transition-all hover:scale-105"><svg class="w-8 h-8" fill="currentColor" viewBox="0 0 24 24"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"></path></svg><span class="font-semibold text-header">GitHub</span></a>
-                    <a href="https://chat.openai.com/" target="_blank" rel="noopener noreferrer" class="bg-gray-700 hover:bg-gray-600 p-4 rounded-xl flex flex-col items-center justify-center space-y-2 transition-all hover:scale-105"><svg class="w-8 h-8 text-teal-400" fill="currentColor" viewBox="0 0 24 24"><path d="M20.73,8.21a2.84,2.84,0,0,0-4-3.83,2.83,2.83,0,0,0-4.63,2,2.84,2.84,0,0,0-1.5,5.1,2.84,2.84,0,0,0,4,3.83,2.83,2.83,0,0,0,4.63-2,2.84,2.84,0,0,0,1.5-5.1ZM12.06,14a1,1,0,1,1-1-1A1,1,0,0,1,12.06,14ZM16,12.06a1,1,0,1,1,1,1A1,1,0,0,1,16,12.06Zm-1-4a1,1,0,1,1-1-1A1,1,0,0,1,15,8.11Zm-4,.05a1,1,0,1,1,1-1A1,1,0,0,1,11,8.16Zm-2.8,2.9a1,1,0,1,1,1.05-1,1,1,0,0,1-1.05,1ZM9.05,16a1,1,0,1,1,1,1A1,1,0,0,1,9.05,16Z"></path></svg><span class="font-semibold text-header">ChatGPT</span></a>
-                    <a href="https://www.tradingview.com/" target="_blank" rel="noopener noreferrer" class="bg-gray-700 hover:bg-gray-600 p-4 rounded-xl flex flex-col items-center justify-center space-y-2 transition-all hover:scale-105"><svg class="w-8 h-8 text-sky-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 11V7a2 2 0 012-2h2a2 2 0 012 2v4m-4 5v-1.5a1.5 1.5 0 011.5-1.5h1a1.5 1.5 0 011.5 1.5V16m-4 0h4m-4 0H7m0 0v-5m0 5v2m6-11v-1.5a1.5 1.5 0 00-1.5-1.5h-1a1.5 1.5 0 00-1.5 1.5V5m4 0H9m0 0v5m0-5V3"></path></svg><span class="font-semibold text-header">TradingView</span></a>
-                    <a id="open-notepad-modal" class="cursor-pointer bg-gray-700 hover:bg-gray-600 p-4 rounded-xl flex flex-col items-center justify-center space-y-2 transition-all hover:scale-105">
-                        <svg class="w-8 h-8 text-yellow-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
-                        </svg>
-                        <span class="font-semibold text-header">Not Defteri</span>
-                    </a>
-                    <a href="https://web.whatsapp.com/" target="_blank" rel="noopener noreferrer" class="bg-gray-700 hover:bg-gray-600 p-4 rounded-xl flex flex-col items-center justify-center space-y-2 transition-all hover:scale-105">
-                        <svg class="w-8 h-8 text-green-500" fill="currentColor" viewBox="0 0 24 24"><path d="M16.75 13.96c.25.13.42.2.46.3.04.1.04.62-.12 1.3.1.02-.38.13-.78.13-.4 0-1.04-.1-1.6-.33-.56-.23-1.1-.56-1.54-.9-.44-.34-.8-.75-1.1-1.22-.3-.47-.54-.98-.7-1.5-.15-.52-.22-1.04-.22-1.56 0-.52.06-1.04.18-1.56.12-.52.32-1.03.6-1.5.28-.48.62-.9.98-1.25.38-.36.78-.64 1.2-.82.42-.18.85-.28 1.3-.28.45 0 .9.1 1.32.28.42.18.8.44 1.12.8.32.34.58.76.76 1.22.18.48.28.98.28 1.5 0 .52-.1.98-.28 1.44-.18.46-.44.86-.76 1.2ZM20.5 3.5C18.2 1.2 15.2 0 12 0 5.4 0 0 5.4 0 12c0 2.2.6 4.2 1.6 6L0 24l6.2-1.6c1.8 1 3.8 1.6 6 1.6h.2c6.5 0 11.8-5.3 11.8-11.8 0-3.2-1.2-6.2-3.6-8.6Zm-8.4 16.7c-2 0-3.8-.6-5.4-1.6L4 19.8l1.4-2.6c-1-1.6-1.6-3.6-1.6-5.6C3.8 6.8 7.4 3 12 3c2.2 0 4.2.8 5.8 2.4 1.6 1.6 2.4 3.6 2.4 5.8.2 4.6-3.4 8.4-8.2 8.4Z"/></svg>
-                        <span class="font-semibold text-header">WhatsApp</span>
-                    </a>
-                    <a href="https://notebooklm.google.com/" target="_blank" rel="noopener noreferrer" class="bg-gray-700 hover:bg-gray-600 p-4 rounded-xl flex flex-col items-center justify-center space-y-2 transition-all hover:scale-105">
-                        <svg class="w-8 h-8 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v11.494m-9-5.747h18"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20.253H6.5a2.5 2.5 0 01-2.5-2.5V6.253a2.5 2.5 0 012.5-2.5H10m4 0h3.5a2.5 2.5 0 012.5 2.5v11.494a2.5 2.5 0 01-2.5 2.5H14"></path></svg>
-                        <span class="font-semibold text-header">NotebookLM</span>
-                    </a>
+    <!-- Modal (İş Takip için) -->
+    <div id="entry-modal" class="fixed z-30 inset-0 overflow-y-auto hidden"><div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0"><div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity"></div><span class="hidden sm:inline-block sm:align-middle sm:h-screen">&#8203;</span><div class="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full"><div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4"><div class="sm:flex sm:items-start"><div class="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left w-full"><h3 class="text-lg leading-6 font-medium text-gray-900" id="modal-title">İş Girişi</h3><div class="mt-4 space-y-4"><div><label for="modal-ilce" class="block text-sm font-medium text-gray-700">İlçe</label><select id="modal-ilce" class="mt-1 block w-full py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"></select></div><div><label for="modal-mahalle" class="block text-sm font-medium text-gray-700">Mahalle</label><select id="modal-mahalle" class="mt-1 block w-full py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"></select></div><div><label for="modal-personel" class="block text-sm font-medium text-gray-700">Personel</label><input type="text" id="modal-personel" class="mt-1 block w-full py-2 px-3 border border-gray-300 bg-gray-100 rounded-md shadow-sm sm:text-sm" readonly></div><div><label for="megsis-date" class="block text-sm font-medium text-gray-700">MEGSİS Onay Tarihi</label><input type="date" id="megsis-date" class="mt-1 block w-full py-2 px-3 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"></div><div><label for="netigma-date" class="block text-sm font-medium text-gray-700">NETİGMA Onay Tarihi</label><input type="date" id="netigma-date" class="mt-1 block w-full py-2 px-3 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"></div><div><label for="mudur-date" class="block text-sm font-medium text-gray-700">MÜDÜR Onay Tarihi</label><input type="date" id="mudur-date" class="mt-1 block w-full py-2 px-3 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"></div><div><label for="modal-not" class="block text-sm font-medium text-gray-700">Not</label><textarea id="modal-not" rows="3" class="mt-1 block w-full py-2 px-3 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"></textarea></div></div></div></div></div><div class="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse"><button type="button" id="save-entry-btn" class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-blue-600 text-base font-medium text-white hover:bg-blue-700 focus:outline-none sm:ml-3 sm:w-auto sm:text-sm">Kaydet</button><button type="button" id="cancel-btn" class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none sm:mt-0 sm:w-auto sm:text-sm">İptal</button></div></div></div></div>
+
+    <!-- Notes Modal -->
+    <div id="notes-modal" class="fixed z-20 inset-0 overflow-y-auto hidden">
+        <div class="flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+            <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity"></div>
+            <span class="hidden sm:inline-block sm:align-middle sm:h-screen">&#8203;</span>
+            <div class="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-4xl sm:w-full">
+                <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+                    <div class="flex justify-between items-center">
+                         <h3 class="text-lg leading-6 font-medium text-gray-900">Not Düşülen Birimler</h3>
+                         <button id="download-notes-excel-btn" class="bg-green-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-green-700 text-sm">Excel Olarak İndir</button>
+                    </div>
+                    <div class="mt-4 table-container" style="max-height: 70vh;">
+                         <table class="min-w-full divide-y divide-gray-200">
+                              <thead class="bg-gray-50 sticky top-0">
+                                   <tr>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">İlçe</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Mahalle</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Personel</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Not</th>
+                                   </tr>
+                              </thead>
+                              <tbody id="notes-table-body" class="bg-white divide-y divide-gray-200">
+                                  <!-- Notes will be injected here -->
+                              </tbody>
+                         </table>
+                    </div>
+                </div>
+                <div class="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
+                    <button type="button" id="close-notes-modal-btn" class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none sm:mt-0 sm:w-auto sm:text-sm">Kapat</button>
                 </div>
             </div>
         </div>
     </div>
-
-    <!-- Notepad List Modal -->
-    <div id="notepad-modal" class="modal-bg fixed inset-0 flex items-center justify-center p-4 hidden z-50 transition-opacity duration-300">
-        <div class="modal-content bg-gray-800 rounded-2xl shadow-2xl w-full max-w-2xl p-6 md:p-8 relative transform scale-95 transition-transform duration-300 flex flex-col" style="max-height: 90vh;">
-            <button class="close-modal-btn absolute top-4 right-4 text-gray-500 hover:text-white transition-colors text-3xl leading-none">&times;</button>
-            <div class="flex justify-between items-center mb-6">
-                <h2 class="text-2xl md:text-3xl font-bold text-header">Not Defteri</h2>
-                <button id="add-new-note-btn" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded-lg transition-colors flex items-center space-x-2">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path></svg>
-                    <span class="hidden sm:inline">Yeni Not Ekle</span>
-                </button>
-            </div>
-            <div id="notes-list-container" class="overflow-y-auto flex-grow">
-                <!-- Notlar buraya yüklenecek -->
-            </div>
-            <div id="notepad-message" class="mt-4 text-center text-sm h-5"></div>
-        </div>
-    </div>
     
-    <!-- Note Editor Modal -->
-    <div id="note-editor-modal" class="modal-bg fixed inset-0 flex items-center justify-center p-4 hidden z-50 transition-opacity duration-300">
-        <div class="modal-content bg-gray-800 rounded-2xl shadow-2xl w-full max-w-2xl p-6 md:p-8 relative transform scale-95 transition-transform duration-300 flex flex-col" style="max-height: 90vh;">
-             <button class="close-modal-btn absolute top-4 right-4 text-gray-500 hover:text-white transition-colors text-3xl leading-none">&times;</button>
-            <h2 id="note-editor-title" class="text-2xl md:text-3xl font-bold text-center mb-6 text-header">Notu Düzenle</h2>
-            <input type="hidden" id="note-editor-id">
-            <textarea id="note-editor-content" class="w-full h-64 p-4 rounded-lg bg-gray-700 border border-gray-600 text-white focus:outline-none focus:ring-2 focus:ring-indigo-500 flex-grow" placeholder="Notunuzu buraya yazın..."></textarea>
-            <button id="save-edited-note-btn" class="mt-6 bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-6 rounded-lg transition-colors w-full sm:w-auto sm:self-center">
-                Kaydet
-            </button>
-        </div>
-    </div>
-    
-    <!-- Note Viewer Modal -->
-    <div id="note-viewer-modal" class="modal-bg fixed inset-0 flex items-center justify-center p-4 hidden z-50 transition-opacity duration-300">
-        <div class="modal-content bg-gray-800 rounded-2xl shadow-2xl w-full max-w-2xl p-6 md:p-8 relative transform scale-95 transition-transform duration-300 flex flex-col" style="max-height: 90vh;">
-             <button class="close-modal-btn absolute top-4 right-4 text-gray-500 hover:text-white transition-colors text-3xl leading-none">&times;</button>
-            <h2 class="text-2xl md:text-3xl font-bold text-center mb-6 text-header">Not Görüntüle</h2>
-            <div id="note-viewer-content" class="w-full p-4 rounded-lg bg-gray-700 border border-gray-600 text-white flex-grow overflow-y-auto whitespace-pre-wrap"></div>
-            <button id="copy-note-btn" class="mt-6 bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-6 rounded-lg transition-colors w-full sm:w-auto sm:self-center">
-                Kopyala
-            </button>
-            <div id="copy-message" class="mt-4 text-center text-sm h-5 text-green-400"></div>
+    <!-- Approval List Modal -->
+    <div id="approval-modal" class="fixed z-20 inset-0 overflow-y-auto hidden">
+        <div class="flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+            <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity"></div>
+            <span class="hidden sm:inline-block sm:align-middle sm:h-screen">&#8203;</span>
+            <div class="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-4xl sm:w-full">
+                <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+                    <div class="flex justify-between items-center">
+                         <h3 id="approval-modal-title" class="text-lg leading-6 font-medium text-gray-900">Onaylı Birimler</h3>
+                    </div>
+                    <div class="mt-4 table-container" style="max-height: 70vh;">
+                         <table class="min-w-full divide-y divide-gray-200">
+                              <thead class="bg-gray-50 sticky top-0">
+                                   <tr>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">İlçe</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Mahalle</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Personel</th>
+                                        <th id="approval-date-header" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Onay Tarihi</th>
+                                   </tr>
+                              </thead>
+                              <tbody id="approval-table-body" class="bg-white divide-y divide-gray-200">
+                                  <!-- Approved items will be injected here -->
+                              </tbody>
+                         </table>
+                    </div>
+                </div>
+                <div class="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
+                    <button type="button" id="close-approval-modal-btn" class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none sm:mt-0 sm:w-auto sm:text-sm">Kapat</button>
+                </div>
+            </div>
         </div>
     </div>
 
 
     <script>
     document.addEventListener('DOMContentLoaded', () => {
-        const themeToggle = document.getElementById('theme-toggle');
-        const timeEl = document.getElementById('time');
-        const dateEl = document.getElementById('date');
-        const htmlEl = document.documentElement;
-        
-        const sunIcon = `<svg class="w-6 h-6 text-yellow-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>`;
-        const moonIcon = `<svg class="w-6 h-6 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path></svg>`;
+        // --- COMMON ELEMENTS ---
+        const loginScreen = document.getElementById('login-screen');
+        const mainApp = document.getElementById('main-app');
+        const loginForm = document.getElementById('login-form');
+        const errorMessage = document.getElementById('error-message');
+        const analizTabBtn = document.getElementById('analiz-tab-btn');
+        const takipTabBtn = document.getElementById('takip-tab-btn');
+        const analizPage = document.getElementById('analiz-page');
+        const takipPage = document.getElementById('takip-page');
 
-        const applyTheme = (theme) => {
-            if (theme === 'light') {
-                htmlEl.classList.add('light');
-                themeToggle.innerHTML = moonIcon;
+        const GITHUB_TOKEN_PARTS = ['ghp_2KS6iY7t', '1ka6bKyHwO', 'NJkXdwOUVh', 'rU3PqlSX'];
+        let isAnalizLoaded = false;
+        let isTakipLoaded = false;
+
+        // --- LOGIN LOGIC ---
+        loginForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            if (username === 'mersinkm' && password === '503344') {
+                loginScreen.classList.add('hidden');
+                mainApp.classList.remove('hidden');
+                initThaAnalizi(); // Load default page
             } else {
-                htmlEl.classList.remove('light');
-                themeToggle.innerHTML = sunIcon;
+                errorMessage.classList.remove('hidden');
             }
-        };
-
-        let currentTheme = localStorage.getItem('theme') || 'dark';
-        applyTheme(currentTheme);
-
-        themeToggle.addEventListener('click', () => {
-            currentTheme = htmlEl.classList.contains('light') ? 'dark' : 'light';
-            localStorage.setItem('theme', currentTheme);
-            applyTheme(currentTheme);
         });
 
-        const updateTime = () => {
-            const now = new Date();
-            timeEl.textContent = now.toLocaleTimeString('tr-TR');
-            dateEl.textContent = now.toLocaleDateString('tr-TR', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
-        };
-        setInterval(updateTime, 1000);
-        updateTime();
-        
-        // --- Notepad GitHub Integration ---
-        const notepadMessage = document.getElementById('notepad-message');
-        const notesListContainer = document.getElementById('notes-list-container');
-        let fileSha = null;
-        let notes = [];
+        // --- TAB SWITCHING LOGIC ---
+        analizTabBtn.addEventListener('click', () => {
+            takipPage.classList.add('hidden');
+            analizPage.classList.remove('hidden');
+            analizTabBtn.classList.add('active');
+            takipTabBtn.classList.remove('active');
+            if (!isAnalizLoaded) initThaAnalizi();
+        });
 
-        const p1 = 'ghp_2KS6iY7t1ka6';
-        const p2 = 'bKyHwONJkXdwO';
-        const p3 = 'UVhrU3PqlSX';
-        const GITHUB_TOKEN = p1 + p2 + p3;
-        
-        const GITHUB_USER = 'gokhangeo';
-        const GITHUB_REPO = 'gokhan';
-        const FILE_PATH = 'portal-notes/notes.json';
-        const API_URL = `https://api.github.com/repos/${GITHUB_USER}/${GITHUB_REPO}/contents/${FILE_PATH}`;
+        takipTabBtn.addEventListener('click', () => {
+            analizPage.classList.add('hidden');
+            takipPage.classList.remove('hidden');
+            takipTabBtn.classList.add('active');
+            analizTabBtn.classList.remove('active');
+            if (!isTakipLoaded) initIsTakip();
+        });
 
-        const showNotepadMessage = (message, isError = false, targetEl = notepadMessage) => {
-            targetEl.textContent = message;
-            targetEl.style.color = isError ? '#f87171' : '#34d399';
-            setTimeout(() => {
-                targetEl.textContent = '';
-            }, 2000);
-        };
+        // --- THA ANALİZİ SCRIPT (self-contained) ---
+        const initThaAnalizi = (() => {
+            let isLoaded = false;
+            const nitelikBilgiMap = new Map([['Tarıma Elverişli Olmayan Yer',{kod:'TEOY',ekonomikDegeri:'VAR'}],['Kaya',{kod:'KAYA',ekonomikDegeri:'YOK'}],['Tepe',{kod:'TEPE',ekonomikDegeri:'VAR'}],['Dağ',{kod:'DAG',ekonomikDegeri:'YOK'}],['Orman',{kod:'ORM',ekonomikDegeri:'YOK'}],['Yol',{kod:'YOL',ekonomikDegeri:'YOK'}],['Dere',{kod:'DERE',ekonomikDegeri:'YOK'}],['Park',{kod:'PRK',ekonomikDegeri:'VAR'}],['Meydan',{kod:'MYD',ekonomikDegeri:'VAR'}],['Köprü',{kod:'KPR',ekonomikDegeri:'YOK'}],['Deniz',{kod:'DNZ',ekonomikDegeri:'YOK'}],['Göl',{kod:'GOL',ekonomikDegeri:'YOK'}],['Nehir',{kod:'NHR',ekonomikDegeri:'YOK'}],['Çalılık',{kod:'CALI',ekonomikDegeri:'VAR'}],['Fundaluk',{kod:'FND',ekonomikDegeri:'VAR'}],['Sarı Alan Arazisi',{kod:'SAA',ekonomikDegeri:'VAR'}],['Yunak',{kod:'YNK',ekonomikDegeri:'VAR'}],['Mezarlık',{kod:'MZR',ekonomikDegeri:'YOK'}],['Kuyu',{kod:'KY',ekonomikDegeri:'YOK'}],['Çeşme',{kod:'CSM',ekonomikDegeri:'YOK'}],['Namazgah',{kod:'NMZ',ekonomikDegeri:'YOK'}],['Cami',{kod:'CAMI',ekonomikDegeri:'YOK'}],['Köy Odası',{kod:'KO',ekonomikDegeri:'YOK'}],['Pazar Yeri',{kod:'PY',ekonomikDegeri:'VAR'}],['Ark',{kod:'ARK',ekonomikDegeri:'YOK'}],['Kanal',{kod:'KNL',ekonomikDegeri:'YOK'}],['Aklan',{kod:'AKLN',ekonomikDegeri:'YOK'}],['Taşlık',{kod:'TSLK',ekonomikDegeri:'VAR'}],['Çay',{kod:'CAY',ekonomikDegeri:'YOK'}],['Su Deposu',{kod:'SD',ekonomikDegeri:'YOK'}],['Köy Boşluğu',{kod:'KB',ekonomikDegeri:'VAR'}],['Tampon Bölge',{kod:'TB',ekonomikDegeri:'VAR'}],['Kadastrosu Yapılmamış Alan',{kod:'KYA',ekonomikDegeri:'VAR'}],['Yol Fazlası',{kod:'YF',ekonomikDegeri:'VAR'}],['Kumluk',{kod:'KMLK',ekonomikDegeri:'VAR'}],['Ham Toprak',{kod:'HT',ekonomikDegeri:'VAR'}],['Hali Arazi',{kod:'HA',ekonomikDegeri:'VAR'}],['Yamaç',{kod:'YMC',ekonomikDegeri:'YOK'}],['Kenarlaşma Sorunu',{kod:'KS',ekonomikDegeri:'VAR'}],['Davalı/Tescilsiz Parsel',{kod:'DTA',ekonomikDegeri:'VAR'}],['Belediye Hizmet Alanı',{kod:'BHA',ekonomikDegeri:'VAR'}],['Yol Boşluğu',{kod:'YB',ekonomikDegeri:'VAR'}],['Pınar',{kod:'PNR',ekonomikDegeri:'YOK'}],['Koru',{kod:'KORU',ekonomikDegeri:'VAR'}],['Baraj',{kod:'BRJ',ekonomikDegeri:'YOK'}],['Hendek',{kod:'HNDK',ekonomikDegeri:'VAR'}],['Kıraç Arazi',{kod:'KA',ekonomikDegeri:'VAR'}],['Çatak',{kod:'ÇTK',ekonomikDegeri:'VAR'}],['Bayır',{kod:'BYR',ekonomikDegeri:'VAR'}],['Yeşil Alan',{kod:'YA',ekonomikDegeri:'VAR'}],['Otopark',{kod:'OTP',ekonomikDegeri:'VAR'}],['Harman Yeri',{kod:'HY',ekonomikDegeri:'VAR'}],['Trafo Yeri',{kod:'TY',ekonomikDegeri:'YOK'}],['Sulama Hattı',{kod:'SH',ekonomikDegeri:'YOK'}],['Kıyı',{kod:'KIYI',ekonomikDegeri:'VAR'}],['Sağlık Koruma Bandı',{kod:'SKB',ekonomikDegeri:'VAR'}],['Obuz',{kod:'OBZ',ekonomikDegeri:'VAR'}],['Değirmen Bendi',{kod:'DB',ekonomikDegeri:'VAR'}],['2B Alanı',{kod:'IKIB',ekonomikDegeri:'VAR'}],['Kesik',{kod:'KSK',ekonomikDegeri:'VAR'}],['Sazlık/Bataklık',{kod:'SZBT',ekonomikDegeri:'VAR'}],['Irmak',{kod:'IRMK',ekonomikDegeri:'YOK'}],['Devlet Hükmü ve Tasarrufu Altındaki Yerler',{kod:'DHTA',ekonomikDegeri:'VAR'}],['Ağaçlık',{kod:'AGC',ekonomikDegeri:'VAR'}],['Tonç',{kod:'TONC',ekonomikDegeri:'VAR'}],['Pilon Yeri',{kod:'PY',ekonomikDegeri:'YOK'}],['Yar',{kod:'YAR',ekonomikDegeri:'YOK'}],['Mera',{kod:'MERA',ekonomikDegeri:'VAR'}],['Rezerv Alan',{kod:'RA',ekonomikDegeri:'VAR'}],['Geometrisi Tespit Edilemeyen Parsel',{kod:'GTEP',ekonomikDegeri:'VAR'}],['Pırnallık',{kod:'PRNL',ekonomikDegeri:'VAR'}],['Su Kaynağı',{kod:'SK',ekonomikDegeri:'VAR'}],['Ağaçlandırılacak Alan',{kod:'AA',ekonomikDegeri:'VAR'}],['Su Yolu',{kod:'SY',ekonomikDegeri:'YOK'}],['Akıntı',{kod:'AKNT',ekonomikDegeri:'YOK'}],['Demiryolu',{kod:'DY',ekonomikDegeri:'YOK'}],['Tump',{kod:'TUMP',ekonomikDegeri:'VAR'}],['Dekovil',{kod:'DKVL',ekonomikDegeri:'YOK'}],['Çocuk Bahçesi',{kod:'ÇB',ekonomikDegeri:'VAR'}],['Otoyol',{kod:'OTOYOL',ekonomikDegeri:'YOK'}],['Spor Tesisi Alanı',{kod:'STA',ekonomikDegeri:'VAR'}],['Şev',{kod:'ŞEV',ekonomikDegeri:'YOK'}],['Teknik Altyapı Alanı',{kod:'TAA',ekonomikDegeri:'VAR'}]]);
+            let nitelikSiralamaAnaliz = [];
+            const tableBody = document.getElementById('data-table');
+            const searchInput = document.getElementById('search-input');
+            const ilceSelect = document.getElementById('ilce-select');
+            const ekonomikVarIlceToplamEl = document.getElementById('ekonomik-var-ilce-toplam');
+            const ekonomikYokIlceToplamEl = document.getElementById('ekonomik-yok-ilce-toplam');
+            const genelToplamEl = document.getElementById('genel-toplam');
+            const toplamKartBaslikEl = document.getElementById('toplam-kart-baslik');
+            const loadingState = document.getElementById('loading-state-analiz');
+            const downloadButton = document.getElementById('download-excel');
+            const toggleChartButton = document.getElementById('toggle-chart');
+            const chartContainer = document.getElementById('chart-container');
+            let allData = [], currentIlce = 'Genel Toplam', currentSort = { key: null, direction: 'asc' };
+            let nitelikBarChartInstance, ilceBarChartInstance;
 
-        function b64EncodeUnicode(str) {
-            return btoa(encodeURIComponent(str).replace(/%([0-9A-F]{2})/g,
-                (match, p1) => String.fromCharCode('0x' + p1)));
-        }
+            async function fetchThaData() { 
+                const token = GITHUB_TOKEN_PARTS.join('');
+                const owner = 'gokhangeo';
+                const repo = 'mersin-th';
+                const path = 'THA.xlsx';
+                const apiUrl = `https://api.github.com/repos/${owner}/${repo}/contents/${path}`;
+                const response = await fetch(apiUrl, { headers: { 'Authorization': `token ${token}` } });
+                if (!response.ok) throw new Error(`GitHub API'den veri çekilemedi: ${response.statusText}`);
+                const data = await response.json();
+                const decodedContent = atob(data.content);
+                const workbook = XLSX.read(decodedContent, { type: 'binary' });
+                const thData = XLSX.utils.sheet_to_json(workbook.Sheets['TH'], { header: 1, raw: true });
+                const adetData = XLSX.utils.sheet_to_json(workbook.Sheets['Adet'], { header: 1, raw: true });
+                return { thData, adetData };
+            }
+            
+            function processThaData({ thData, adetData }) {
+                const allIlceData = [];
+                const thHeaders = thData[0];
+                const thNitelikler = thData.slice(1);
+                nitelikSiralamaAnaliz = thNitelikler
+                    .map(row => String(row[0] || '').trim())
+                    .filter(nitelikName => nitelikName && nitelikName.toLowerCase() !== 'genel toplam');
+                
+                const adetHeaders = adetData[0];
+                const adetNitelikler = adetData.slice(1).reduce((map, row) => {
+                    map[String(row[0] || '').trim()] = row;
+                    return map;
+                }, {});
+                const ilceNames = thHeaders.slice(1);
+                thNitelikler.forEach(row => {
+                    const nitelikName = String(row[0] || '').trim();
+                    if (!nitelikName || nitelikName.toLowerCase() === 'genel toplam') return;
+                    const adetRow = adetNitelikler[nitelikName];
+                    ilceNames.forEach((ilceName, index) => {
+                        const cleanIlceName = String(ilceName || '').trim();
+                        if (cleanIlceName.toLowerCase() === 'genel toplam') return; 
+                        
+                        const yuzolcumHa = parseFloat(row[index + 1]) || 0;
+                        const adet = adetRow ? (parseInt(adetRow[index + 1]) || 0) : 0;
+                        const bilgi = nitelikBilgiMap.get(nitelikName) || { kod: 'BİLİNMİYOR', ekonomikDegeri: 'VAR' };
+                        
+                        allIlceData.push({
+                            nitelik: nitelikName,
+                            ilce: cleanIlceName,
+                            kod: bilgi.kod,
+                            adet: adet,
+                            ekonomikDegeri: bilgi.ekonomikDegeri,
+                            yuzolcumM2: yuzolcumHa * 10000,
+                            yuzolcumHa: yuzolcumHa
+                        });
+                    });
+                });
+                const genelToplamMap = new Map();
+                allIlceData.forEach(item => {
+                    const current = genelToplamMap.get(item.nitelik) || { yuzolcumM2: 0, adet: 0 };
+                    genelToplamMap.set(item.nitelik, {
+                        yuzolcumM2: current.yuzolcumM2 + item.yuzolcumM2,
+                        adet: current.adet + item.adet
+                    });
+                });
+                genelToplamMap.forEach((totals, nitelikName) => {
+                     const bilgi = nitelikBilgiMap.get(nitelikName) || { kod: 'BİLİNMİYOR', ekonomikDegeri: 'VAR' };
+                     allIlceData.push({
+                         nitelik: nitelikName,
+                         ilce: 'Genel Toplam',
+                         kod: bilgi.kod,
+                         adet: totals.adet,
+                         ekonomikDegeri: bilgi.ekonomikDegeri,
+                         yuzolcumM2: totals.yuzolcumM2,
+                         yuzolcumHa: totals.yuzolcumM2 / 10000
+                     });
+                });
+                return allIlceData;
+            }
 
-        function b64DecodeUnicode(str) {
-            return decodeURIComponent(atob(str).split('').map((c) => {
-                return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
-            }).join(''));
-        }
+            function formatNumber(num) { return new Intl.NumberFormat('tr-TR').format(num); }
+            
+            function renderThaTable(data) {
+                tableBody.innerHTML = '';
+                if (data.length === 0) { tableBody.innerHTML = `<tr><td colspan="6" class="text-center py-12 px-6 text-gray-500">Arama sonucu boş.</td></tr>`; return; }
+                data.forEach(item => {
+                    const ekonomikDegerClass = item.ekonomikDegeri === 'VAR' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800';
+                    const row = `
+                        <tr class="hover:bg-gray-50"><td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">${item.nitelik}</td><td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${item.kod}</td><td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 text-right">${formatNumber(item.adet)}</td><td class="px-6 py-4 whitespace-nowrap text-sm"><span class="px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${ekonomikDegerClass}">${item.ekonomikDegeri}</span></td><td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 text-right">${formatNumber(item.yuzolcumM2)}</td><td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 text-right">${formatNumber(item.yuzolcumHa)}</td></tr>`;
+                    tableBody.innerHTML += row;
+                });
+            }
 
-        const saveNotesToGithub = async (showSuccessMessage = false) => {
-            const content = JSON.stringify(notes, null, 2);
-            const encodedContent = b64EncodeUnicode(content);
+             function renderThaCharts(data) {
+                renderNitelikBarChart(data);
+                renderIlceBarChart();
+            }
 
-            try {
-                const body = {
-                    message: `Notlar güncellendi - ${new Date().toISOString()}`,
-                    content: encodedContent,
-                };
-                if (fileSha) {
-                    body.sha = fileSha;
+            function renderNitelikBarChart(data){
+                const ctx = document.getElementById('nitelikBarChart').getContext('2d');
+                if (nitelikBarChartInstance) nitelikBarChartInstance.destroy();
+                const chartData = [...data].filter(d => d.yuzolcumM2 > 0).sort((a,b) => b.yuzolcumM2 - a.yuzolcumM2).slice(0, 15);
+                nitelikBarChartInstance = new Chart(ctx, { type: 'bar', data: { labels: chartData.map(d => d.nitelik), datasets: [{ label: 'Yüzölçüm (m²)', data: chartData.map(d => d.yuzolcumM2), backgroundColor: '#4C78A8' }] }, options: { indexAxis: 'y', responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { x: { beginAtZero: true } } } });
+            }
+
+            function renderIlceBarChart(){
+                const ctx = document.getElementById('ilceBarChart').getContext('2d');
+                if (ilceBarChartInstance) ilceBarChartInstance.destroy();
+                const searchTerm = searchInput.value.trim();
+                if (!searchTerm) {
+                    ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+                    ctx.font = "16px Inter";
+                    ctx.fillStyle = "#6b7280";
+                    ctx.textAlign = "center";
+                    ctx.fillText("İlçe karşılaştırması için bir nitelik arayın.", ctx.canvas.width / 2, ctx.canvas.height / 2);
+                    return;
                 }
+                const filteredByNitelik = allData.filter(d => d.nitelik.toLowerCase().includes(searchTerm.toLowerCase()) && d.ilce !== 'Genel Toplam' && d.yuzolcumM2 > 0);
+                const chartData = filteredByNitelik.sort((a,b) => b.yuzolcumM2 - a.yuzolcumM2);
+                const backgroundColors = ['#4C78A8', '#F58518', '#E45756', '#72B7B2', '#54A24B', '#EECA3B', '#B279A2', '#FF9DA6', '#9D755D', '#BAB0AC', '#66c2a5', '#fc8d62', '#8da0cb' ];
+                ilceBarChartInstance = new Chart(ctx, { type: 'bar', data: { labels: chartData.map(d => d.ilce), datasets: [{ label: `${searchTerm} Alan Dağılımı (m²)`, data: chartData.map(d => d.yuzolcumM2), backgroundColor: chartData.map((_, i) => backgroundColors[i % backgroundColors.length]) }] }, options: { indexAxis: 'y', responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { x: { beginAtZero: true } } } });
+            }
 
-                const response = await fetch(API_URL, {
-                    method: 'PUT',
-                    headers: {
-                        'Authorization': `token ${GITHUB_TOKEN}`,
-                        'Accept': 'application/vnd.github.v3+json',
-                        'Content-Type': 'application/json'
+            function updateThaView() {
+                const searchTerm = searchInput.value.toLowerCase().trim();
+                const districtRawData = allData.filter(item => item.ilce === currentIlce);
+                let completeDistrictData = nitelikSiralamaAnaliz.map(nitelikName => {
+                    const existingItem = districtRawData.find(item => item.nitelik === nitelikName);
+                    if (existingItem) return existingItem;
+                    const bilgi = nitelikBilgiMap.get(nitelikName) || { kod: 'BİLİNMİYOR', ekonomikDegeri: 'VAR' };
+                    return { nitelik: nitelikName, ilce: currentIlce, kod: bilgi.kod, adet: 0, ekonomikDegeri: bilgi.ekonomikDegeri, yuzolcumM2: 0, yuzolcumHa: 0 };
+                });
+                const totals = completeDistrictData.reduce((acc, item) => { item.ekonomikDegeri === 'VAR' ? acc.var += item.yuzolcumM2 : acc.yok += item.yuzolcumM2; return acc; }, { var: 0, yok: 0 });
+                ekonomikVarIlceToplamEl.textContent = `${formatNumber(totals.var)} m²`;
+                ekonomikYokIlceToplamEl.textContent = `${formatNumber(totals.yok)} m²`;
+                const totalForDynamicCard = completeDistrictData.reduce((acc, item) => acc + item.yuzolcumM2, 0);
+                toplamKartBaslikEl.textContent = currentIlce === 'Genel Toplam' ? 'Mersin Genel Toplam' : `${currentIlce} Genel Toplam`;
+                genelToplamEl.textContent = `${formatNumber(totalForDynamicCard)} m²`;
+                let filteredData = completeDistrictData;
+                if (searchTerm) { filteredData = filteredData.filter(item => item.nitelik.toLowerCase().includes(searchTerm)); }
+                if (currentSort.key) {
+                    filteredData.sort((a, b) => {
+                        const valA = a[currentSort.key], valB = b[currentSort.key];
+                        const direction = currentSort.direction === 'asc' ? 1 : -1;
+                        return typeof valA === 'string' ? valA.localeCompare(valB) * direction : (valA - valB) * direction;
+                    });
+                }
+                renderThaTable(filteredData);
+                if (!chartContainer.classList.contains('hidden')) { renderThaCharts(completeDistrictData); }
+            }
+            
+            function downloadExcel() {
+                const searchTerm = searchInput.value.toLowerCase().trim();
+                const dataToExport = allData.filter(item => 
+                    item.ilce === currentIlce &&
+                    (searchTerm === '' || item.nitelik.toLowerCase().includes(searchTerm))
+                ).map(row => ({
+                    'Nitelik': row.nitelik,
+                    'Kod': row.kod,
+                    'Adet': row.adet,
+                    'Ekonomik Değeri': row.ekonomikDegeri,
+                    'Yüzölçüm (m²)': row.yuzolcumM2,
+                    'Yüzölçüm (ha)': row.yuzolcumHa
+                }));
+
+                const ws = XLSX.utils.json_to_sheet(dataToExport);
+                const wb = XLSX.utils.book_new();
+                XLSX.utils.book_append_sheet(wb, ws, `${currentIlce} Raporu`);
+                XLSX.writeFile(wb, `${currentIlce.toLowerCase().replace(/ /g, '_')}_tha_raporu.xlsx`);
+            }
+            
+            async function init() {
+                if(isLoaded) return;
+                isLoaded = true;
+                isAnalizLoaded = true;
+                loadingState.textContent = 'GitHub\'dan veriler yükleniyor...';
+                try {
+                    const rawData = await fetchThaData();
+                    allData = processThaData(rawData);
+                    const ilceler = ['Genel Toplam', ...[...new Set(allData.map(item => item.ilce))].filter(i => i !== 'Genel Toplam').sort((a,b) => a.localeCompare(b, 'tr'))];
+                    ilceSelect.innerHTML = ilceler.map(i => `<option value="${i}">${i}</option>`).join('');
+                    ilceSelect.value = 'Genel Toplam';
+                    updateThaView();
+                    searchInput.disabled = false;
+                    ilceSelect.disabled = false;
+                    downloadButton.disabled = false;
+                    toggleChartButton.disabled = false;
+                    loadingState.parentElement.parentElement.remove();
+                } catch (error) {
+                    console.error("THA Analiz veri yükleme hatası:", error);
+                    loadingState.textContent = "Veriler yüklenemedi.";
+                    loadingState.classList.add('text-red-500');
+                }
+            }
+             // Event Listeners for THA Analizi
+            ilceSelect.addEventListener('change', (e) => { currentIlce = e.target.value; searchInput.value = ''; currentSort = { key: null, direction: 'asc' }; document.querySelectorAll('#analiz-page th .sort-icon').forEach(icon => icon.classList.remove('active')); updateThaView(); });
+            searchInput.addEventListener('input', updateThaView);
+            downloadButton.addEventListener('click', downloadExcel);
+            toggleChartButton.addEventListener('click', () => { chartContainer.classList.toggle('hidden'); if(!chartContainer.classList.contains('hidden')) updateThaView(); });
+            document.querySelectorAll('#analiz-page th[data-sort-by]').forEach(th => {
+                th.addEventListener('click', () => {
+                    const sortKey = th.dataset.sortBy;
+                    let direction = (currentSort.key === sortKey && currentSort.direction === 'asc') ? 'desc' : 'asc';
+                    if (currentSort.key !== sortKey && (sortKey === 'yuzolcumM2' || sortKey === 'yuzolcumHa' || sortKey === 'adet')) direction = 'desc';
+                    currentSort = { key: sortKey, direction };
+                    document.querySelectorAll('#analiz-page th .sort-icon').forEach(icon => icon.classList.remove('active'));
+                    th.querySelector('.sort-icon').classList.add('active');
+                    updateThaView();
+                });
+            });
+            return init;
+        })();
+        // --- İŞ TAKİP SCRIPT (self-contained) ---
+        const initIsTakip = (() => {
+            let isLoaded = false;
+            const ilceFilter = document.getElementById('takip-ilce-filter');
+            const mahalleFilter = document.getElementById('takip-mahalle-filter');
+            const personelFilter = document.getElementById('takip-personel-filter');
+            const taskTable = document.getElementById('task-table');
+            const addEntryBtn = document.getElementById('add-entry-btn');
+            const modal = document.getElementById('entry-modal');
+            const cancelBtn = document.getElementById('cancel-btn');
+            const saveEntryBtn = document.getElementById('save-entry-btn');
+            const modalTitle = document.getElementById('modal-title');
+            const modalIlce = document.getElementById('modal-ilce');
+            const modalMahalle = document.getElementById('modal-mahalle');
+            const modalPersonel = document.getElementById('modal-personel');
+            const megsisDate = document.getElementById('megsis-date');
+            const netigmaDate = document.getElementById('netigma-date');
+            const mudurDate = document.getElementById('mudur-date');
+            const modalNot = document.getElementById('modal-not');
+            const loadingState = document.getElementById('loading-state-takip');
+            const downloadChartBtn = document.getElementById('download-chart-btn');
+            const downloadTakipExcelBtn = document.getElementById('download-takip-excel-btn');
+            const toplamMahalleCountEl = document.getElementById('toplam-mahalle-count');
+            const megsisCard = document.getElementById('megsis-card');
+            const netigmaCard = document.getElementById('netigma-card');
+            const mudurCard = document.getElementById('mudur-card');
+            const megsisOnayCountEl = document.getElementById('megsis-onay-count');
+            const netigmaOnayCountEl = document.getElementById('netigma-onay-count');
+            const mudurOnayCountEl = document.getElementById('mudur-onay-count');
+            const personelChartTitle = document.getElementById('personel-chart-title');
+            const notCard = document.getElementById('not-card');
+            const notCountEl = document.getElementById('not-count');
+            const notesModal = document.getElementById('notes-modal');
+            const closeNotesModalBtn = document.getElementById('close-notes-modal-btn');
+            const notesTableBody = document.getElementById('notes-table-body');
+            const downloadNotesExcelBtn = document.getElementById('download-notes-excel-btn');
+            const approvalModal = document.getElementById('approval-modal');
+            const closeApprovalModalBtn = document.getElementById('close-approval-modal-btn');
+            const approvalModalTitle = document.getElementById('approval-modal-title');
+            const approvalDateHeader = document.getElementById('approval-date-header');
+            const approvalTableBody = document.getElementById('approval-table-body');
+
+            let taskData = [], personelFileSha = '';
+            let personelChartInstance;
+            let currentDisplayData = [];
+            const GITHUB_FILE_URL = 'https://api.github.com/repos/gokhangeo/mersin-th/contents/Personel.xlsx';
+            
+            Chart.register(ChartDataLabels);
+
+            async function loadTakipData() {
+                 try {
+                     loadingState.textContent = 'GitHub\'dan veriler okunuyor...';
+                     const token = GITHUB_TOKEN_PARTS.join('');
+                     const response = await fetch(GITHUB_FILE_URL, { headers: { 'Authorization': `token ${token}` } });
+                     if (!response.ok) throw new Error('GitHub\'dan Personel verisi alınamadı.');
+                     const fileData = await response.json();
+                     personelFileSha = fileData.sha;
+                     const fileContent = atob(fileData.content);
+                     const workbook = XLSX.read(fileContent, { type: 'binary' });
+                     taskData = [];
+                     workbook.SheetNames.forEach(sheetName => {
+                         const json = XLSX.utils.sheet_to_json(workbook.Sheets[sheetName]);
+                         json.forEach(row => {
+                             const mahalle = row['Mahalle Adı'];
+                             const personel = row['GÖREVLİ PERSONEL'];
+                             if (mahalle && personel) {
+                                  const megsis = row['MEGSİS ONAY TARİHİ'] ? excelDateToJSDate(row['MEGSİS ONAY TARİHİ']) : '';
+                                  const netigma = row['NETİGMA ONAY TARİHİ'] ? excelDateToJSDate(row['NETİGMA ONAY TARİHİ']) : '';
+                                  const mudur = row['MÜDÜR ONAY'] ? excelDateToJSDate(row['MÜDÜR ONAY']) : '';
+                                  const not = row['NOT'] || '';
+                                  taskData.push({ ilce: sheetName, mahalle, personel, megsis, netigma, mudur, not });
+                             }
+                         });
+                     });
+                     populateTakipFilters();
+                     renderTakipTable();
+                     if(loadingState && loadingState.parentElement) loadingState.parentElement.parentElement.remove();
+                 } catch (error) {
+                     console.error('İş Takip veri yüklenirken hata:', error);
+                     if(loadingState) {
+                         loadingState.textContent = "Veriler yüklenemedi.";
+                         loadingState.classList.add('text-red-500');
+                     }
+                 }
+            }
+            function excelDateToJSDate(excelDate) {
+                if(typeof excelDate === 'string' && (excelDate.includes('-') || excelDate.includes('.'))) return new Date(excelDate.replace(/\./g, '-')).toISOString().split('T')[0];
+                if(typeof excelDate !== 'number') return '';
+                const date = new Date((excelDate - 25569) * 86400 * 1000);
+                return date.toISOString().split('T')[0];
+            }
+            async function saveDataToGitHub() {
+                saveEntryBtn.disabled = true;
+                saveEntryBtn.textContent = 'Kaydediliyor...';
+                try {
+                    const wb = XLSX.utils.book_new();
+                    const ilceler = [...new Set(taskData.map(p => p.ilce))].sort((a,b) => a.localeCompare(b, 'tr'));
+                    
+                    ilceler.forEach(ilce => {
+                        const sheetData = taskData
+                            .filter(p => p.ilce === ilce)
+                            .sort((a,b) => a.mahalle.localeCompare(b.mahalle, 'tr'))
+                            .map(p => ({
+                                'Mahalle Adı': p.mahalle,
+                                'GÖREVLİ PERSONEL': p.personel,
+                                'MEGSİS ONAY TARİHİ': p.megsis || undefined,
+                                'NETİGMA ONAY TARİHİ': p.netigma || undefined,
+                                'MÜDÜR ONAY': p.mudur || undefined,
+                                'NOT': p.not || undefined
+                            }));
+                        const ws = XLSX.utils.json_to_sheet(sheetData);
+                        XLSX.utils.book_append_sheet(wb, ws, ilce);
+                    });
+                    const wbout = XLSX.write(wb, { bookType: 'xlsx', type: 'base64' });
+                    const token = GITHUB_TOKEN_PARTS.join('');
+                    const response = await fetch(GITHUB_FILE_URL, {
+                        method: 'PUT',
+                        headers: { 'Authorization': `token ${token}`, 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ message: `[THA Sistemi] Veri Güncelleme`, content: wbout, sha: personelFileSha })
+                    });
+                    if (!response.ok) throw new Error(await response.text());
+                    alert('Veri başarıyla GitHub\'a kaydedildi!');
+                    await loadTakipData();
+                } catch (error) {
+                    console.error('Kaydetme hatası:', error);
+                    alert(`Bir hata oluştu: ${error.message}`);
+                } finally {
+                    saveEntryBtn.disabled = false;
+                    saveEntryBtn.textContent = 'Kaydet';
+                    modal.classList.add('hidden');
+                }
+            }
+            function populateTakipFilters() { 
+                const ilceler = ['Tümü', ...[...new Set(taskData.map(p => p.ilce))].sort((a,b) => a.localeCompare(b, 'tr'))];
+                const mahalleler = ['Tümü', ...[...new Set(taskData.map(p => p.mahalle))].sort((a,b) => a.localeCompare(b, 'tr'))];
+                const personeller = ['Tümü', ...[...new Set(taskData.map(p => p.personel))].sort((a,b) => a.localeCompare(b, 'tr'))];
+
+                ilceFilter.innerHTML = ilceler.map(i => `<option value="${i}">${i}</option>`).join('');
+                mahalleFilter.innerHTML = mahalleler.map(m => `<option value="${m}">${m}</option>`).join('');
+                personelFilter.innerHTML = personeller.map(p => `<option value="${p}">${p}</option>`).join('');
+            }
+            
+            function updateSummaryCards(data) {
+                const toplamMahalle = data.length;
+                const megsisOnay = data.filter(task => task.megsis).length;
+                const netigmaOnay = data.filter(task => task.netigma).length;
+                const mudurOnay = data.filter(task => task.mudur).length;
+                const notDüşülenler = data.filter(task => task.not && task.not.trim() !== '').length;
+
+                toplamMahalleCountEl.textContent = toplamMahalle;
+                megsisOnayCountEl.textContent = megsisOnay;
+                netigmaOnayCountEl.textContent = netigmaOnay;
+                mudurOnayCountEl.textContent = mudurOnay;
+                notCountEl.textContent = notDüşülenler;
+            }
+
+            function renderTakipTable() { 
+                const selectedIlce = ilceFilter.value;
+                const selectedMahalle = mahalleFilter.value;
+                const selectedPersonel = personelFilter.value;
+
+                currentDisplayData = taskData.filter(task => 
+                    (selectedIlce === 'Tümü' || task.ilce === selectedIlce) &&
+                    (selectedMahalle === 'Tümü' || task.mahalle === selectedMahalle) &&
+                    (selectedPersonel === 'Tümü' || task.personel === selectedPersonel)
+                );
+                
+                updateSummaryCards(currentDisplayData);
+                personelChartTitle.textContent = selectedIlce === 'Tümü' 
+                    ? 'Personel Giriş Sayıları (Tüm İlçeler)' 
+                    : `Personel Giriş Sayıları (${selectedIlce})`;
+
+                // Sort the data: entries with dates on top, then alphabetically
+                currentDisplayData.sort((a, b) => {
+                    const aHasDate = a.megsis || a.netigma || a.mudur;
+                    const bHasDate = b.megsis || b.netigma || b.mudur;
+                    if (aHasDate && !bHasDate) return -1; // a (with date) comes before b (without)
+                    if (!aHasDate && bHasDate) return 1; // b comes before a
+                    // Secondary sort: alphabetically by ilce then mahalle
+                    return a.ilce.localeCompare(b.ilce, 'tr-TR') || a.mahalle.localeCompare(b.mahalle, 'tr-TR');
+                });
+
+                if(currentDisplayData.length === 0){
+                    taskTable.innerHTML = `<tr><td colspan="7" class="text-center p-8 text-gray-500">Filtreye uygun kayıt bulunamadı.</td></tr>`;
+                } else {
+                     taskTable.innerHTML = currentDisplayData.map((task) => `
+                        <tr class="hover:bg-gray-50" data-task-ilce="${task.ilce}" data-task-mahalle="${task.mahalle}">
+                            <td class="px-6 py-4 whitespace-nowrap">${task.ilce}</td>
+                            <td class="px-6 py-4 whitespace-nowrap">${task.mahalle}</td>
+                            <td class="px-6 py-4 whitespace-nowrap">${task.personel}</td>
+                            <td class="px-6 py-4 whitespace-nowrap">${task.megsis || '-'}</td>
+                            <td class="px-6 py-4 whitespace-nowrap">${task.netigma || '-'}</td>
+                            <td class="px-6 py-4 whitespace-nowrap">${task.mudur || '-'}</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 truncate max-w-xs" title="${task.not || ''}">${task.not || '-'}</td>
+                        </tr>`).join('');
+                }
+                 document.querySelectorAll('#task-table tr').forEach(row => {
+                     row.addEventListener('click', () => openEditModal(row.dataset.taskIlce, row.dataset.taskMahalle));
+                 });
+                renderTakipChart(currentDisplayData);
+            }
+            function renderTakipChart(data) { 
+                const ctx = document.getElementById('personelChart').getContext('2d');
+                if (personelChartInstance) personelChartInstance.destroy();
+                const personelCounts = data.reduce((acc, task) => { if(task.megsis || task.netigma) {acc[task.personel] = (acc[task.personel] || 0) + 1;} return acc; }, {});
+                const sortedPersonel = Object.entries(personelCounts).sort(([,a],[,b]) => b-a);
+                personelChartInstance = new Chart(ctx, { 
+                    type: 'bar', 
+                    data: { 
+                        labels: sortedPersonel.map(e => e[0]), 
+                        datasets: [{ 
+                            label: 'Toplam Giriş Sayısı', 
+                            data: sortedPersonel.map(e => e[1]), 
+                            backgroundColor: '#3b82f6' 
+                        }] 
+                    }, 
+                    options: { 
+                        responsive: true, 
+                        maintainAspectRatio: false, 
+                        plugins: {
+                            legend: { display: false },
+                            datalabels: {
+                                anchor: 'end',
+                                align: 'end',
+                                color: '#444',
+                                font: {
+                                    weight: 'bold'
+                                }
+                            }
+                        },
+                        scales: { 
+                            y: { 
+                                beginAtZero: true, 
+                                ticks: { stepSize: 1 } 
+                            } 
+                        } 
                     },
-                    body: JSON.stringify(body)
+                    plugins: [ChartDataLabels]
                 });
+            }
+            function openEditModal(ilce, mahalle) {
+                if (!ilce || !mahalle) return;
+                const task = taskData.find(t => t.ilce === ilce && t.mahalle === mahalle);
+                if (!task) return;
+
+                modalTitle.textContent = `İş Girişini Düzenle`;
                 
-                if (response.ok || response.status === 201) {
-                    const data = await response.json();
-                    fileSha = data.content.sha;
-                    if(showSuccessMessage) showNotepadMessage('Notlar başarıyla GitHub\'a kaydedildi!');
-                } else {
-                    const error = await response.json();
-                    throw new Error(error.message || 'Notlar kaydedilemedi.');
-                }
-            } catch (error) {
-                 showNotepadMessage(`Hata: ${error.message}`, true);
-            }
-        };
-        
-        const renderNotes = () => {
-            notesListContainer.innerHTML = '';
-            if (notes.length === 0) {
-                 notesListContainer.innerHTML = `<p class="text-center text-gray-400">Henüz not eklenmemiş.</p>`;
-                 return;
-            }
+                modalIlce.innerHTML = `<option value="${task.ilce}">${task.ilce}</option>`;
+                modalIlce.value = task.ilce;
+                modalIlce.disabled = true;
 
-            notes.forEach(note => {
-                const noteEl = document.createElement('div');
-                noteEl.className = 'note-item';
-                noteEl.setAttribute('data-id', note.id);
-                
-                const noteContent = document.createElement('p');
-                noteContent.className = 'flex-grow truncate pr-4 text-header cursor-pointer';
-                noteContent.textContent = note.content.split('\n')[0] || 'Boş not'; // Show first line
-                noteContent.onclick = () => openNoteViewer(note.id);
-                noteEl.appendChild(noteContent);
-                
-                const buttonsContainer = document.createElement('div');
-                buttonsContainer.className = 'flex items-center space-x-2';
-                
-                const editBtn = document.createElement('button');
-                editBtn.innerHTML = `<svg class="w-5 h-5 text-gray-400 hover:text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.5L15.232 5.232z"></path></svg>`;
-                editBtn.className = 'edit-note-btn';
-                editBtn.onclick = () => openNoteEditor(note.id);
-                buttonsContainer.appendChild(editBtn);
+                modalMahalle.innerHTML = `<option value="${task.mahalle}">${task.mahalle}</option>`;
+                modalMahalle.value = task.mahalle;
+                modalMahalle.disabled = true;
 
-                const deleteBtn = document.createElement('button');
-                deleteBtn.innerHTML = `<svg class="w-5 h-5 text-gray-400 hover:text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>`;
-                deleteBtn.className = 'delete-note-btn';
-                deleteBtn.onclick = () => deleteNote(note.id);
-                buttonsContainer.appendChild(deleteBtn);
-
-                noteEl.appendChild(buttonsContainer);
-                notesListContainer.appendChild(noteEl);
-            });
-        };
-
-        const loadNotes = async () => {
-            notesListContainer.innerHTML = `<p class="text-center text-gray-400">Notlar GitHub'dan yükleniyor...</p>`;
-            try {
-                const response = await fetch(API_URL, {
-                    headers: { 'Authorization': `token ${GITHUB_TOKEN}`, 'Accept': 'application/vnd.github.v3+json' }
-                });
-
-                if (response.ok) {
-                    const data = await response.json();
-                    notes = JSON.parse(b64DecodeUnicode(data.content));
-                    fileSha = data.sha;
-                } else if (response.status === 404) {
-                    notes = [];
-                } else {
-                    const error = await response.json();
-                    throw new Error(error.message || 'Notlar yüklenemedi.');
-                }
-            } catch (error) {
-                showNotepadMessage(`Hata: ${error.message}.`, true);
-                notes = [];
-            }
-            renderNotes();
-        };
-
-        const deleteNote = (id) => {
-            notes = notes.filter(note => note.id !== id);
-            renderNotes();
-            saveNotesToGithub(true);
-        };
-        
-        const openNoteEditor = (id = null) => {
-            const editorModal = document.getElementById('note-editor-modal');
-            const editorTitle = document.getElementById('note-editor-title');
-            const editorContent = document.getElementById('note-editor-content');
-            const editorIdInput = document.getElementById('note-editor-id');
-            
-            if (id) { // Editing existing note
-                const note = notes.find(n => n.id === id);
-                if(note) {
-                    editorTitle.textContent = 'Notu Düzenle';
-                    editorContent.value = note.content;
-                    editorIdInput.value = id;
-                }
-            } else { // Adding new note
-                editorTitle.textContent = 'Yeni Not Ekle';
-                editorContent.value = '';
-                editorIdInput.value = '';
-            }
-            showModal('note-editor-modal');
-        };
-        
-        const saveEditedNote = () => {
-            const editorContent = document.getElementById('note-editor-content');
-            const editorIdInput = document.getElementById('note-editor-id');
-            const id = editorIdInput.value;
-            const content = editorContent.value;
-
-            if (id) { // Update existing note
-                const noteIndex = notes.findIndex(n => n.id == id);
-                if (noteIndex > -1) {
-                    notes[noteIndex].content = content;
-                }
-            } else { // Create new note
-                const newNote = {
-                    id: Date.now(),
-                    content: content
-                };
-                notes.unshift(newNote); // Add to the beginning
-            }
-            
-            hideModal('note-editor-modal');
-            renderNotes();
-            saveNotesToGithub(true);
-        };
-
-        const openNoteViewer = (id) => {
-            const note = notes.find(n => n.id === id);
-            if (note) {
-                const viewerContent = document.getElementById('note-viewer-content');
-                viewerContent.textContent = note.content;
-                showModal('note-viewer-modal');
-            }
-        };
-
-        const copyNoteContent = () => {
-            const viewerContent = document.getElementById('note-viewer-content');
-            const copyMessageEl = document.getElementById('copy-message');
-            navigator.clipboard.writeText(viewerContent.textContent).then(() => {
-                showNotepadMessage('Not kopyalandı!', false, copyMessageEl);
-            }, () => {
-                showNotepadMessage('Kopyalanamadı!', true, copyMessageEl);
-            });
-        };
-
-        document.getElementById('add-new-note-btn').addEventListener('click', () => openNoteEditor());
-        document.getElementById('save-edited-note-btn').addEventListener('click', saveEditedNote);
-        document.getElementById('copy-note-btn').addEventListener('click', copyNoteContent);
-
-
-        // --- Modal Yönetimi ---
-        const modalInstances = {};
-
-        const setupModal = (modalId, onShowCallback) => {
-            const modal = document.getElementById(modalId);
-            if (!modal) return;
-            const modalContent = modal.querySelector('.modal-content');
-            const closeButtons = modal.querySelectorAll('.close-modal-btn');
-
-            const show = () => {
+                modalPersonel.value = task.personel;
+                megsisDate.value = task.megsis || '';
+                netigmaDate.value = task.netigma || '';
+                mudurDate.value = task.mudur || '';
+                modalNot.value = task.not || '';
                 modal.classList.remove('hidden');
-                setTimeout(() => {
-                    modal.classList.add('opacity-100');
-                    modalContent.classList.add('scale-100');
-                    if (onShowCallback) onShowCallback();
-                }, 10);
-            };
-
-            const hide = () => {
-                modal.classList.remove('opacity-100');
-                modalContent.classList.remove('scale-100');
-                setTimeout(() => modal.classList.add('hidden'), 300);
-            };
-            
-            modalInstances[modalId] = { show, hide };
-            
-            closeButtons.forEach(btn => btn.addEventListener('click', hide));
-            modal.addEventListener('click', (e) => {
-                if (e.target === modal) hide();
-            });
-        };
-        
-        const showModal = (modalId) => modalInstances[modalId]?.show();
-        const hideModal = (modalId) => modalInstances[modalId]?.hide();
-
-        const setupTrigger = (triggerId, modalId) => {
-            const trigger = document.getElementById(triggerId);
-            if (trigger) {
-                trigger.addEventListener('click', () => showModal(modalId));
             }
-        };
-        
-        // Modalları ve tetikleyicileri ayarla
-        setupModal('tkgm-modal');
-        setupModal('projects-modal');
-        setupModal('other-modal');
-        setupModal('notepad-modal', loadNotes);
-        setupModal('note-editor-modal');
-        setupModal('note-viewer-modal');
-        
-        setupTrigger('open-tkgm-modal', 'tkgm-modal');
-        setupTrigger('open-projects-modal', 'projects-modal');
-        setupTrigger('open-other-modal', 'other-modal');
-        setupTrigger('open-notepad-modal', 'notepad-modal');
+
+            function renderNotesModal() {
+                const notedTasks = currentDisplayData.filter(task => task.not && task.not.trim() !== '');
+                notesTableBody.innerHTML = '';
+                if (notedTasks.length === 0) {
+                    notesTableBody.innerHTML = `<tr><td colspan="4" class="text-center p-8 text-gray-500">Not düşülen birim bulunamadı.</td></tr>`;
+                } else {
+                    notesTableBody.innerHTML = notedTasks.map(task => `
+                        <tr class="hover:bg-gray-50">
+                            <td class="px-6 py-4 whitespace-nowrap">${task.ilce}</td>
+                            <td class="px-6 py-4 whitespace-nowrap">${task.mahalle}</td>
+                            <td class="px-6 py-4 whitespace-nowrap">${task.personel}</td>
+                            <td class="px-6 py-4 whitespace-normal text-sm text-gray-700">${task.not}</td>
+                        </tr>
+                    `).join('');
+                }
+                notesModal.classList.remove('hidden');
+            }
+
+            function downloadNotesExcel() {
+                const notedTasks = currentDisplayData.filter(task => task.not && task.not.trim() !== '');
+                const dataToExport = notedTasks.map(row => ({
+                    'İlçe': row.ilce,
+                    'Mahalle': row.mahalle,
+                    'Görevli Personel': row.personel,
+                    'Not': row.not
+                }));
+
+                if(dataToExport.length === 0){
+                    alert('Dışa aktarılacak not bulunmuyor.');
+                    return;
+                }
+
+                const ws = XLSX.utils.json_to_sheet(dataToExport);
+                const wb = XLSX.utils.book_new();
+                XLSX.utils.book_append_sheet(wb, ws, 'Not Raporu');
+                XLSX.writeFile(wb, 'not_raporu.xlsx');
+            }
+            
+            function openApprovalModal(approvalType) {
+                let title = '';
+                let header = '';
+                switch (approvalType) {
+                    case 'megsis':
+                        title = 'Megsis Onayı Olan Birimler';
+                        header = 'Megsis Onay Tarihi';
+                        break;
+                    case 'netigma':
+                        title = 'Netigma Onayı Olan Birimler';
+                        header = 'Netigma Onay Tarihi';
+                        break;
+                    case 'mudur':
+                        title = 'Müdür Onayı Olan Birimler';
+                        header = 'Müdür Onay Tarihi';
+                        break;
+                }
+                approvalModalTitle.textContent = title;
+                approvalDateHeader.textContent = header;
+
+                const approvedTasks = currentDisplayData.filter(task => task[approvalType]);
+                
+                approvalTableBody.innerHTML = '';
+                if (approvedTasks.length === 0) {
+                    approvalTableBody.innerHTML = `<tr><td colspan="4" class="text-center p-8 text-gray-500">Bu onaya sahip birim bulunamadı.</td></tr>`;
+                } else {
+                    approvalTableBody.innerHTML = approvedTasks.map(task => `
+                        <tr class="hover:bg-gray-50 cursor-pointer" data-task-ilce="${task.ilce}" data-task-mahalle="${task.mahalle}">
+                            <td class="px-6 py-4 whitespace-nowrap">${task.ilce}</td>
+                            <td class="px-6 py-4 whitespace-nowrap">${task.mahalle}</td>
+                            <td class="px-6 py-4 whitespace-nowrap">${task.personel}</td>
+                            <td class="px-6 py-4 whitespace-nowrap">${task[approvalType]}</td>
+                        </tr>
+                    `).join('');
+
+                    document.querySelectorAll('#approval-table-body tr[data-task-ilce]').forEach(row => {
+                        row.addEventListener('click', () => {
+                            approvalModal.classList.add('hidden');
+                            openEditModal(row.dataset.taskIlce, row.dataset.taskMahalle);
+                        });
+                    });
+                }
+                approvalModal.classList.remove('hidden');
+            }
+
+            async function init() {
+                if(isLoaded) return;
+                isLoaded = true;
+                isTakipLoaded = true;
+                await loadTakipData();
+                
+                ilceFilter.addEventListener('change', () => {
+                     const selectedIlce = ilceFilter.value;
+                     const mahalleler = ['Tümü', ...[...new Set(taskData.filter(p => selectedIlce === 'Tümü' || p.ilce === selectedIlce).map(p => p.mahalle))].sort((a,b) => a.localeCompare(b, 'tr'))];
+                     mahalleFilter.innerHTML = mahalleler.map(m => `<option value="${m}">${m}</option>`).join('');
+                     renderTakipTable();
+                });
+                mahalleFilter.addEventListener('change', renderTakipTable);
+                personelFilter.addEventListener('change', renderTakipTable);
+
+                addEntryBtn.addEventListener('click', () => {
+                    modalTitle.textContent = 'Yeni İş Girişi';
+                    modalIlce.disabled = false;
+                    modalMahalle.disabled = false;
+                    const ilceler = [...new Set(taskData.map(p => p.ilce))].sort((a,b) => a.localeCompare(b, 'tr'));
+                    modalIlce.innerHTML = `<option value="">İlçe Seçin</option>` + ilceler.map(i => `<option value="${i}">${i}</option>`).join('');
+                    modalMahalle.innerHTML = `<option value="">Önce İlçe Seçin</option>`;
+                    modalPersonel.value = '';
+                    megsisDate.value = '';
+                    netigmaDate.value = '';
+                    mudurDate.value = '';
+                    modalNot.value = '';
+                    modal.classList.remove('hidden');
+                });
+                modalIlce.addEventListener('change', () => {
+                     const selectedIlce = modalIlce.value;
+                     const mahalleler = [...new Set(taskData.filter(p => p.ilce === selectedIlce).map(p => p.mahalle))].sort((a,b) => a.localeCompare(b, 'tr'));
+                     modalMahalle.innerHTML = `<option value="">Mahalle Seçin</option>` + mahalleler.map(m => `<option value="${m}">${m}</option>`).join('');
+                     modalPersonel.value = '';
+                     megsisDate.value = '';
+                     netigmaDate.value = '';
+                     mudurDate.value = '';
+                     modalNot.value = '';
+                });
+                modalMahalle.addEventListener('change', () => {
+                    const selectedIlce = modalIlce.value;
+                    const selectedMahalle = modalMahalle.value;
+                    const gorevli = taskData.find(p => p.ilce === selectedIlce && p.mahalle === selectedMahalle);
+                    
+                    if (gorevli) {
+                        modalPersonel.value = gorevli.personel || 'Atanmamış';
+                        megsisDate.value = gorevli.megsis || '';
+                        netigmaDate.value = gorevli.netigma || '';
+                        mudurDate.value = gorevli.mudur || '';
+                        modalNot.value = gorevli.not || '';
+                    } else {
+                        modalPersonel.value = 'Atanmamış';
+                        megsisDate.value = '';
+                        netigmaDate.value = '';
+                        mudurDate.value = '';
+                        modalNot.value = '';
+                    }
+                });
+                cancelBtn.addEventListener('click', () => modal.classList.add('hidden'));
+
+                saveEntryBtn.addEventListener('click', () => {
+                    const ilce = modalIlce.value;
+                    const mahalle = modalMahalle.value;
+                    const not = modalNot.value;
+
+                    if (!ilce || !mahalle) { alert('Lütfen ilçe ve mahalle seçin.'); return; }
+                    
+                    let task = taskData.find(t => t.ilce === ilce && t.mahalle === mahalle);
+                    
+                    if (task) { // Update existing
+                        task.megsis = megsisDate.value;
+                        task.netigma = netigmaDate.value;
+                        task.mudur = mudurDate.value;
+                        task.not = not;
+                    } else { // Create new
+                         task = { ilce, mahalle, personel: modalPersonel.value, megsis: megsisDate.value, netigma: netigmaDate.value, mudur: mudurDate.value, not: not };
+                        taskData.push(task);
+                    }
+                    saveDataToGitHub();
+                });
+                
+                downloadChartBtn.addEventListener('click', () => {
+                    const canvas = document.getElementById('personelChart');
+                    const image = canvas.toDataURL('image/jpeg', 1.0);
+                    const link = document.createElement('a');
+                    link.href = image;
+                    link.download = 'personel-giris-grafigi.jpg';
+                    link.click();
+                });
+
+                downloadTakipExcelBtn.addEventListener('click', () => {
+                    const dataToExport = currentDisplayData.map(row => ({
+                        'İlçe': row.ilce,
+                        'Mahalle': row.mahalle,
+                        'Görevli Personel': row.personel,
+                        'Megsis Onay': row.megsis,
+                        'Netigma Onay': row.netigma,
+                        'Müdür Onay': row.mudur,
+                        'Not': row.not
+                    }));
+                    const ws = XLSX.utils.json_to_sheet(dataToExport);
+                    const wb = XLSX.utils.book_new();
+                    XLSX.utils.book_append_sheet(wb, ws, 'İş Takip Raporu');
+                    XLSX.writeFile(wb, 'is_takip_raporu.xlsx');
+                });
+
+                notCard.addEventListener('click', renderNotesModal);
+                closeNotesModalBtn.addEventListener('click', () => notesModal.classList.add('hidden'));
+                downloadNotesExcelBtn.addEventListener('click', downloadNotesExcel);
+                
+                megsisCard.addEventListener('click', () => openApprovalModal('megsis'));
+                netigmaCard.addEventListener('click', () => openApprovalModal('netigma'));
+                mudurCard.addEventListener('click', () => openApprovalModal('mudur'));
+                closeApprovalModalBtn.addEventListener('click', () => approvalModal.classList.add('hidden'));
+            }
+            return init;
+        })();
     });
     </script>
 </body>
 </html>
-
 
