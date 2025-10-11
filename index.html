@@ -113,13 +113,22 @@
                 </div>
             </div>
 
-            <!-- MEGSIS Bekleyenler Warning Section -->
-            <div id="megsis-bekleyenler-container" class="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg hidden">
-                <h3 class="font-bold text-red-800 mb-3 text-center text-lg">MEGSİS Onayı Bekleyen Notlar</h3>
-                <div id="megsis-bekleyenler-listesi" class="flex flex-wrap justify-center gap-2">
-                    <!-- Blinking items will be injected here by JS -->
+            <!-- Warning Sections -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+                <div id="megsis-bekleyenler-container" class="p-4 bg-red-50 border border-red-200 rounded-lg hidden">
+                    <h3 class="font-bold text-red-800 mb-3 text-center text-lg">MEGSİS Onayı Bekleyen Notlar</h3>
+                    <div id="megsis-bekleyenler-listesi" class="flex flex-wrap justify-center gap-2">
+                        <!-- Blinking items will be injected here by JS -->
+                    </div>
+                </div>
+                <div id="geri-bildirim-bekleyenler-container" class="p-4 bg-blue-50 border border-blue-200 rounded-lg hidden">
+                    <h3 class="font-bold text-blue-800 mb-3 text-center text-lg">Geri Bildirim Bekleyenler</h3>
+                    <div id="geri-bildirim-bekleyenler-listesi" class="flex flex-wrap justify-center gap-2">
+                        <!-- Blinking items will be injected here by JS -->
+                    </div>
                 </div>
             </div>
+
 
             <div class="mb-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6 items-end">
                 <div class="bg-white p-4 rounded-xl shadow"><label for="takip-ilce-filter" class="block text-sm font-medium text-gray-700">İlçeye Göre Filtrele</label><select id="takip-ilce-filter" class="mt-1 block w-full py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"></select></div>
@@ -142,7 +151,7 @@
     </div>
     
     <!-- Modal (İş Takip için) -->
-    <div id="entry-modal" class="fixed z-30 inset-0 overflow-y-auto hidden"><div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0"><div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity"></div><span class="hidden sm:inline-block sm:align-middle sm:h-screen">&#8203;</span><div class="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full"><div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4"><div class="sm:flex sm:items-start"><div class="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left w-full"><h3 class="text-lg leading-6 font-medium text-gray-900" id="modal-title">İş Girişi</h3><div class="mt-4 space-y-4"><div><label for="modal-ilce" class="block text-sm font-medium text-gray-700">İlçe</label><select id="modal-ilce" class="mt-1 block w-full py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"></select></div><div><label for="modal-mahalle" class="block text-sm font-medium text-gray-700">Mahalle</label><select id="modal-mahalle" class="mt-1 block w-full py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"></select></div><div><label for="modal-personel" class="block text-sm font-medium text-gray-700">Personel</label><input type="text" id="modal-personel" class="mt-1 block w-full py-2 px-3 border border-gray-300 bg-gray-100 rounded-md shadow-sm sm:text-sm" readonly></div><div><label for="megsis-date" class="block text-sm font-medium text-gray-700">MEGSİS Onay Tarihi</label><input type="date" id="megsis-date" class="mt-1 block w-full py-2 px-3 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"></div><div><label for="netigma-date" class="block text-sm font-medium text-gray-700">NETİGMA Onay Tarihi</label><input type="date" id="netigma-date" class="mt-1 block w-full py-2 px-3 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"></div><div><label for="mudur-date" class="block text-sm font-medium text-gray-700">MÜDÜR Onay Tarihi</label><input type="date" id="mudur-date" class="mt-1 block w-full py-2 px-3 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"></div><div><label for="modal-not" class="block text-sm font-medium text-gray-700">Not</label><textarea id="modal-not" rows="3" class="mt-1 block w-full py-2 px-3 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"></textarea></div><div id="not-tarihi-container" class="hidden"> <label for="not-tarihi" class="block text-sm font-medium text-gray-700">Not Tarihi</label> <input type="date" id="not-tarihi" class="mt-1 block w-full py-2 px-3 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"></div></div></div></div></div><div class="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse"><button type="button" id="save-entry-btn" class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-blue-600 text-base font-medium text-white hover:bg-blue-700 focus:outline-none sm:ml-3 sm:w-auto sm:text-sm">Kaydet</button><button type="button" id="cancel-btn" class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none sm:mt-0 sm:w-auto sm:text-sm">İptal</button></div></div></div></div>
+    <div id="entry-modal" class="fixed z-30 inset-0 overflow-y-auto hidden"><div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0"><div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity"></div><span class="hidden sm:inline-block sm:align-middle sm:h-screen">&#8203;</span><div class="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full"><div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4"><div class="sm:flex sm:items-start"><div class="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left w-full"><h3 class="text-lg leading-6 font-medium text-gray-900" id="modal-title">İş Girişi</h3><div class="mt-4 space-y-4"><div><label for="modal-ilce" class="block text-sm font-medium text-gray-700">İlçe</label><select id="modal-ilce" class="mt-1 block w-full py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"></select></div><div><label for="modal-mahalle" class="block text-sm font-medium text-gray-700">Mahalle</label><select id="modal-mahalle" class="mt-1 block w-full py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"></select></div><div><label for="modal-personel" class="block text-sm font-medium text-gray-700">Personel</label><input type="text" id="modal-personel" class="mt-1 block w-full py-2 px-3 border border-gray-300 bg-gray-100 rounded-md shadow-sm sm:text-sm" readonly></div><div><label for="megsis-date" class="block text-sm font-medium text-gray-700">MEGSİS Onay Tarihi</label><input type="date" id="megsis-date" class="mt-1 block w-full py-2 px-3 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"></div><div><label for="netigma-date" class="block text-sm font-medium text-gray-700">NETİGMA Onay Tarihi</label><input type="date" id="netigma-date" class="mt-1 block w-full py-2 px-3 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"></div><div><label for="mudur-date" class="block text-sm font-medium text-gray-700">MÜDÜR Onay Tarihi</label><input type="date" id="mudur-date" class="mt-1 block w-full py-2 px-3 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"></div><div><label for="modal-not" class="block text-sm font-medium text-gray-700">Not</label><textarea id="modal-not" rows="3" class="mt-1 block w-full py-2 px-3 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"></textarea></div><div id="not-tarihi-container" class="hidden"> <label for="not-tarihi" class="block text-sm font-medium text-gray-700">Not Tarihi</label> <input type="date" id="not-tarihi" class="mt-1 block w-full py-2 px-3 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"></div><div class="space-y-2 mt-4 border-t pt-4"><div class="flex items-center"><input id="is-geri-bildirim-check" type="checkbox" class="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"><label for="is-geri-bildirim-check" class="ml-2 block text-sm text-gray-900">Geri Bildirim Notu</label></div><div id="geri-bildirim-tamamlandi-container" class="hidden flex items-center"><input id="geri-bildirim-tamamlandi-check" type="checkbox" class="h-4 w-4 text-green-600 focus:ring-green-500 border-gray-300 rounded"><label for="geri-bildirim-tamamlandi-check" class="ml-2 block text-sm text-gray-900">Geri Bildirim Tamamlandı</label></div></div></div></div></div></div><div class="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse"><button type="button" id="save-entry-btn" class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-blue-600 text-base font-medium text-white hover:bg-blue-700 focus:outline-none sm:ml-3 sm:w-auto sm:text-sm">Kaydet</button><button type="button" id="cancel-btn" class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none sm:mt-0 sm:w-auto sm:text-sm">İptal</button></div></div></div></div>
 
     <!-- Notes Modal -->
     <div id="notes-modal" class="fixed z-40 inset-0 overflow-y-auto hidden">
@@ -386,6 +395,8 @@
             const netigmaBekleyenCountEl = document.getElementById('netigma-bekleyen-count');
             const mefsisBekleyenlerContainer = document.getElementById('megsis-bekleyenler-container');
             const mefsisBekleyenlerListesi = document.getElementById('megsis-bekleyenler-listesi');
+            const geriBildirimBekleyenlerContainer = document.getElementById('geri-bildirim-bekleyenler-container');
+            const geriBildirimBekleyenlerListesi = document.getElementById('geri-bildirim-bekleyenler-listesi');
             const notesModal = document.getElementById('notes-modal');
             const closeNotesModalBtn = document.getElementById('close-notes-modal-btn');
             const notesTableBody = document.getElementById('notes-table-body');
@@ -405,6 +416,9 @@
             const bolgeIadeModal = document.getElementById('bolge-iade-modal');
             const closeBolgeIadeModalBtn = document.getElementById('close-bolge-iade-modal-btn');
             const bolgeIadeTableBody = document.getElementById('bolge-iade-table-body');
+            const isGeriBildirimCheck = document.getElementById('is-geri-bildirim-check');
+            const geriBildirimTamamlandiContainer = document.getElementById('geri-bildirim-tamamlandi-container');
+            const geriBildirimTamamlandiCheck = document.getElementById('geri-bildirim-tamamlandi-check');
 
 
             let taskData = [], personelFileSha = '';
@@ -433,7 +447,11 @@
                                    const mudur = row['MÜDÜR ONAY'] ? excelDateToJSDate(row['MÜDÜR ONAY']) : '';
                                    const not = row['NOT'] || '';
                                    const not_tarihi = row['NOT_TARIHI'] ? excelDateToJSDate(row['NOT_TARIHI']) : '';
-                                   taskData.push({ ilce: sheetName, mahalle, personel, megsis, netigma, mudur, not, not_tarihi });
+                                   taskData.push({ 
+                                       ilce: sheetName, mahalle, personel, megsis, netigma, mudur, not, not_tarihi,
+                                       isGeriBildirim: row['IS_GERI_BILDIRIM'] || false,
+                                       geriBildirimTamamlandi: row['GERI_BILDIRIM_TAMAMLANDI'] || false
+                                    });
                               }
                           });
                       });
@@ -472,7 +490,9 @@
                                 'NETİGMA ONAY TARİHİ': p.netigma || undefined,
                                 'MÜDÜR ONAY': p.mudur || undefined,
                                 'NOT': p.not || undefined,
-                                'NOT_TARIHI': p.not_tarihi || undefined
+                                'NOT_TARIHI': p.not_tarihi || undefined,
+                                'IS_GERI_BILDIRIM': p.isGeriBildirim || undefined,
+                                'GERI_BILDIRIM_TAMAMLANDI': p.geriBildirimTamamlandi || undefined
                             }));
                         const ws = XLSX.utils.json_to_sheet(sheetData);
                         XLSX.utils.book_append_sheet(wb, ws, ilce);
@@ -536,7 +556,8 @@
 
                 renderTakipTable(currentDisplayData);
                 renderInteractiveList(currentDisplayData);
-                renderMegsisBekleyenler(taskData); // This should always check all data
+                renderMegsisBekleyenler(taskData); 
+                renderGeriBildirimBekleyenler(taskData);
                 updateSummaryCards(currentDisplayData);
             }
 
@@ -691,6 +712,32 @@
                 });
             }
 
+             function renderGeriBildirimBekleyenler(data) {
+                const bekleyenler = data.filter(task => task.isGeriBildirim && !task.geriBildirimTamamlandi);
+
+                if (bekleyenler.length === 0) {
+                    geriBildirimBekleyenlerContainer.classList.add('hidden');
+                    return;
+                }
+
+                geriBildirimBekleyenlerContainer.classList.remove('hidden');
+                
+                geriBildirimBekleyenlerListesi.innerHTML = bekleyenler.map(task => `
+                    <div class="geri-bildirim-bekleyen-item cursor-pointer bg-blue-100 text-blue-800 text-sm px-3 py-2 rounded-lg animate-blink flex flex-col items-center"
+                          data-ilce="${task.ilce}" data-mahalle="${task.mahalle}">
+                        <span class="text-xs font-semibold text-blue-700">${task.ilce}</span>
+                        <span class="font-bold">${task.mahalle}</span>
+                        <span class="text-xs text-blue-600 lowercase">(${task.personel})</span>
+                    </div>
+                `).join('');
+
+                document.querySelectorAll('.geri-bildirim-bekleyen-item').forEach(item => {
+                    item.addEventListener('click', () => {
+                        openEditModal(item.dataset.ilce, item.dataset.mahalle);
+                    });
+                });
+            }
+
             function openEditModal(ilce, mahalle) {
                 if (!ilce || !mahalle) return;
                 const task = taskData.find(t => t.ilce === ilce && t.mahalle === mahalle);
@@ -712,11 +759,19 @@
                 mudurDate.value = task.mudur || '';
                 modalNot.value = task.not || '';
                 notTarihiInput.value = task.not_tarihi || '';
+                isGeriBildirimCheck.checked = task.isGeriBildirim || false;
+                geriBildirimTamamlandiCheck.checked = task.geriBildirimTamamlandi || false;
 
                 if (task.not && task.not.trim() !== '') {
                     notTarihiContainer.classList.remove('hidden');
                 } else {
                     notTarihiContainer.classList.add('hidden');
+                }
+                
+                if (isGeriBildirimCheck.checked) {
+                    geriBildirimTamamlandiContainer.classList.remove('hidden');
+                } else {
+                    geriBildirimTamamlandiContainer.classList.add('hidden');
                 }
 
                 modal.classList.remove('hidden');
@@ -1022,6 +1077,9 @@
                     modalNot.value = '';
                     notTarihiInput.value = '';
                     notTarihiContainer.classList.add('hidden');
+                    isGeriBildirimCheck.checked = false;
+                    geriBildirimTamamlandiCheck.checked = false;
+                    geriBildirimTamamlandiContainer.classList.add('hidden');
                     modal.classList.remove('hidden');
                 });
                 modalIlce.addEventListener('change', () => {
@@ -1062,6 +1120,15 @@
                     }
                 });
 
+                isGeriBildirimCheck.addEventListener('change', () => {
+                    if (isGeriBildirimCheck.checked) {
+                        geriBildirimTamamlandiContainer.classList.remove('hidden');
+                    } else {
+                        geriBildirimTamamlandiContainer.classList.add('hidden');
+                        geriBildirimTamamlandiCheck.checked = false; 
+                    }
+                });
+
                 cancelBtn.addEventListener('click', () => modal.classList.add('hidden'));
 
                 saveEntryBtn.addEventListener('click', () => {
@@ -1071,8 +1138,10 @@
                     if (task) { 
                         task.megsis = megsisDate.value; task.netigma = netigmaDate.value; task.mudur = mudurDate.value; task.not = not;
                         task.not_tarihi = not.trim() === '' ? '' : not_tarihi;
+                        task.isGeriBildirim = isGeriBildirimCheck.checked;
+                        task.geriBildirimTamamlandi = geriBildirimTamamlandiCheck.checked;
                     } else {
-                         task = { ilce, mahalle, personel: modalPersonel.value, megsis: megsisDate.value, netigma: netigmaDate.value, mudur: mudurDate.value, not: not, not_tarihi: not.trim() === '' ? '' : not_tarihi };
+                         task = { ilce, mahalle, personel: modalPersonel.value, megsis: megsisDate.value, netigma: netigmaDate.value, mudur: mudurDate.value, not: not, not_tarihi: not.trim() === '' ? '' : not_tarihi, isGeriBildirim: isGeriBildirimCheck.checked, geriBildirimTamamlandi: geriBildirimTamamlandiCheck.checked };
                         taskData.push(task);
                     }
                     saveDataToGitHub();
@@ -1081,7 +1150,8 @@
                 downloadTakipExcelBtn.addEventListener('click', () => {
                     const dataToExport = currentDisplayData.map(row => ({
                         'İlçe': row.ilce, 'Mahalle': row.mahalle, 'Görevli Personel': row.personel, 'Megsis Onay': row.megsis,
-                        'Netigma Onay': row.netigma, 'Müdür Onay': row.mudur, 'Not Tarihi': row.not_tarihi, 'Not': row.not
+                        'Netigma Onay': row.netigma, 'Müdür Onay': row.mudur, 'Not Tarihi': row.not_tarihi, 'Not': row.not,
+                        'Geri Bildirim?': row.isGeriBildirim, 'GB Tamamlandı?': row.geriBildirimTamamlandi
                     }));
                     const ws = XLSX.utils.json_to_sheet(dataToExport);
                     const wb = XLSX.utils.book_new();
