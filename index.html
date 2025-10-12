@@ -338,6 +338,17 @@
         const errorMessage = document.getElementById('error-message');
 
         const GITHUB_TOKEN_PARTS = ['ghp_2KS6iY7t', '1ka6bKyHwO', 'NJkXdwOUVh', 'rU3PqlSX'];
+        
+        function toTitleCase(str) {
+            if (!str) return '';
+            return str.toString().replace(
+                /\b\w/g,
+                char => char.toLocaleUpperCase('tr-TR')
+            ).replace(
+                /(?<=(\s|-))\w/g,
+                 char => char.toLocaleUpperCase('tr-TR')
+            );
+        }
 
         // --- LOGIN LOGIC ---
         loginForm.addEventListener('submit', (e) => {
@@ -441,7 +452,7 @@
                           const json = XLSX.utils.sheet_to_json(workbook.Sheets[sheetName]);
                           json.forEach(row => {
                               const mahalle = row['Mahalle Adı'];
-                              const personel = row['GÖREVLİ PERSONEL'];
+                              const personel = toTitleCase(row['GÖREVLİ PERSONEL']);
                               if (mahalle && personel) {
                                    const megsis = row['MEGSİS ONAY TARİHİ'] ? excelDateToJSDate(row['MEGSİS ONAY TARİHİ']) : '';
                                    const netigma = row['NETİGMA ONAY TARİHİ'] ? excelDateToJSDate(row['NETİGMA ONAY TARİHİ']) : '';
@@ -702,7 +713,7 @@
                           data-ilce="${task.ilce}" data-mahalle="${task.mahalle}">
                         <span class="text-xs font-semibold text-red-700">${task.ilce}</span>
                         <span class="font-bold">${task.mahalle}</span>
-                        <span class="text-xs text-red-600 lowercase">(${task.personel})</span>
+                        <span class="text-xs text-red-600">(${task.personel})</span>
                     </div>
                 `).join('');
 
@@ -728,7 +739,7 @@
                           data-ilce="${task.ilce}" data-mahalle="${task.mahalle}">
                         <span class="text-xs font-semibold text-blue-700">${task.ilce}</span>
                         <span class="font-bold">${task.mahalle}</span>
-                        <span class="text-xs text-blue-600 lowercase">(${task.personel})</span>
+                        <span class="text-xs text-blue-600">(${task.personel})</span>
                     </div>
                 `).join('');
 
