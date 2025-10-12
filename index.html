@@ -347,13 +347,12 @@
         
         function toTitleCase(str) {
             if (!str) return '';
-            return str.toString().toLowerCase().replace(
-                /\b\w/g,
-                char => char.toLocaleUpperCase('tr-TR')
-            ).replace(
-                /(?<=(\s|-))\w/g,
-                 char => char.toLocaleUpperCase('tr-TR')
-            );
+            return str.toString().split(' ').map(word => {
+                if (word.length === 0) return '';
+                const firstChar = word.charAt(0).toLocaleUpperCase('tr-TR');
+                const rest = word.slice(1).toLocaleLowerCase('tr-TR');
+                return firstChar + rest;
+            }).join(' ');
         }
 
         // --- LOGIN LOGIC ---
@@ -1244,4 +1243,5 @@
     </script>
 </body>
 </html>
+
 
