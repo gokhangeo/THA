@@ -114,7 +114,13 @@
             </div>
 
             <!-- Warning Sections -->
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+                 <div id="netigma-onay-bekleyenler-container" class="p-4 bg-green-50 border border-green-200 rounded-lg hidden">
+                    <h3 class="font-bold text-green-800 mb-3 text-center text-lg">Netigma Onayı Bekleyenler</h3>
+                    <div id="netigma-onay-bekleyenler-listesi" class="flex flex-wrap justify-center gap-2">
+                        <!-- Blinking green items will be injected here by JS -->
+                    </div>
+                </div>
                 <div id="megsis-bekleyenler-container" class="p-4 bg-red-50 border border-red-200 rounded-lg hidden">
                     <h3 class="font-bold text-red-800 mb-3 text-center text-lg">MEGSİS Onayı Bekleyen Notlar (İade Olanlar)</h3>
                     <div id="megsis-bekleyenler-listesi" class="flex flex-wrap justify-center gap-2">
@@ -341,7 +347,7 @@
         
         function toTitleCase(str) {
             if (!str) return '';
-            return str.toString().replace(
+            return str.toString().toLowerCase().replace(
                 /\b\w/g,
                 char => char.toLocaleUpperCase('tr-TR')
             ).replace(
@@ -409,6 +415,8 @@
             const mefsisBekleyenlerListesi = document.getElementById('megsis-bekleyenler-listesi');
             const geriBildirimBekleyenlerContainer = document.getElementById('geri-bildirim-bekleyenler-container');
             const geriBildirimBekleyenlerListesi = document.getElementById('geri-bildirim-bekleyenler-listesi');
+            const netigmaOnayBekleyenlerContainer = document.getElementById('netigma-onay-bekleyenler-container');
+            const netigmaOnayBekleyenlerListesi = document.getElementById('netigma-onay-bekleyenler-listesi');
             const notesModal = document.getElementById('notes-modal');
             const closeNotesModalBtn = document.getElementById('close-notes-modal-btn');
             const notesTableBody = document.getElementById('notes-table-body');
@@ -570,6 +578,7 @@
                 renderInteractiveList(currentDisplayData);
                 renderMegsisBekleyenler(taskData); 
                 renderGeriBildirimBekleyenler(taskData);
+                renderNetigmaOnayBekleyenler(taskData);
                 updateSummaryCards(currentDisplayData);
             }
 
@@ -744,6 +753,32 @@
                 `).join('');
 
                 document.querySelectorAll('.geri-bildirim-bekleyen-item').forEach(item => {
+                    item.addEventListener('click', () => {
+                        openEditModal(item.dataset.ilce, item.dataset.mahalle);
+                    });
+                });
+            }
+
+             function renderNetigmaOnayBekleyenler(data) {
+                const bekleyenler = data.filter(task => task.megsis && !task.netigma);
+
+                if (bekleyenler.length === 0) {
+                    netigmaOnayBekleyenlerContainer.classList.add('hidden');
+                    return;
+                }
+
+                netigmaOnayBekleyenlerContainer.classList.remove('hidden');
+                
+                netigmaOnayBekleyenlerListesi.innerHTML = bekleyenler.map(task => `
+                    <div class="netigma-onay-bekleyen-item cursor-pointer bg-green-100 text-green-800 text-sm px-3 py-2 rounded-lg animate-blink flex flex-col items-center"
+                            data-ilce="${task.ilce}" data-mahalle="${task.mahalle}">
+                        <span class="text-xs font-semibold text-green-700">${task.ilce}</span>
+                        <span class="font-bold">${task.mahalle}</span>
+                        <span class="text-xs text-green-600">(${task.personel})</span>
+                    </div>
+                `).join('');
+
+                document.querySelectorAll('.netigma-onay-bekleyen-item').forEach(item => {
                     item.addEventListener('click', () => {
                         openEditModal(item.dataset.ilce, item.dataset.mahalle);
                     });
