@@ -18,10 +18,10 @@
             overflow-x: auto;
         }
         .table-container::-webkit-scrollbar { width: 8px; height: 8px; }
-        .table-container::-webkit-scrollbar-track { background: #f1f1ff; }
+        .table-container::-webkit-scrollbar-track { background: #f1f1f1; }
         .table-container::-webkit-scrollbar-thumb { background: #888; border-radius: 4px; }
         .table-container::-webkit-scrollbar-thumb:hover { background: #555; }
-        #task-table tr, #notes-table-body tr, #approval-table-body tr, #bolge-iade-table-body tr {
+        #task-table tr, #notes-table-body tr, #approval-table-body tr {
             cursor: pointer;
         }
         .ilce-header .arrow {
@@ -39,7 +39,6 @@
     </style>
 </head>
 <body class="text-gray-800">
-    <input type="file" id="bolge-iade-file-input" class="hidden" accept=".xlsx, .xls, .csv">
     <!-- Login Screen -->
     <div id="login-screen" class="flex items-center justify-center min-h-screen bg-gradient-to-br from-blue-100 to-gray-100">
         <div class="w-full max-w-md p-8 space-y-6 bg-white rounded-xl shadow-2xl">
@@ -75,10 +74,6 @@
             
             <!-- Summary Cards -->
             <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 mb-6">
-                 <div id="bolge-iade-card" class="bg-white p-4 rounded-xl shadow text-center cursor-pointer hover:bg-gray-50 transition">
-                    <h3 class="text-sm font-medium text-gray-500">Bölge İade Kontrolü</h3>
-                    <p class="mt-1 text-3xl font-semibold text-cyan-500">🔄</p>
-                </div>
                 <div id="performans-raporu-card" class="bg-white p-4 rounded-xl shadow text-center cursor-pointer hover:bg-gray-50 transition">
                     <h3 class="text-sm font-medium text-gray-500">Performans Raporu</h3>
                     <p class="mt-1 text-3xl font-semibold text-orange-500">📊</p>
@@ -307,36 +302,10 @@
         </div>
     </div>
     
-    <!-- Bölge İade Raporu Modal -->
+    <!-- Bölge İade Raporu Modal (Kaldırıldı ama JS'te referansları olabilir diye ID'li div bırakıldı) -->
     <div id="bolge-iade-modal" class="fixed z-40 inset-0 overflow-y-auto hidden">
-        <div class="flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
-            <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity"></div>
-            <span class="hidden sm:inline-block sm:align-middle sm:h-screen">&#8203;</span>
-            <div class="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-4xl sm:w-full">
-                <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
-                    <div class="flex justify-between items-center">
-                         <h3 class="text-lg leading-6 font-medium text-gray-900">Bölgeden İade Edilen İşlemler</h3>
-                    </div>
-                    <div class="mt-4 table-container" style="max-height: 70vh;">
-                         <table class="min-w-full divide-y divide-gray-200">
-                             <thead class="bg-gray-50 sticky top-0">
-                                 <tr>
-                                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">İlçe</th>
-                                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Mahalle</th>
-                                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Personel</th>
-                                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Müdür Onay Tarihi</th>
-                                 </tr>
-                            </thead>
-                            <tbody id="bolge-iade-table-body" class="bg-white divide-y divide-gray-200">
-                                <!-- Results here -->
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-                <div class="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
-                    <button type="button" id="close-bolge-iade-modal-btn" class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none sm:mt-0 sm:w-auto sm:text-sm">Kapat</button>
-                </div>
-            </div>
+         <div class="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
+            <button type="button" id="close-bolge-iade-modal-btn" class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none sm:mt-0 sm:w-auto sm:text-sm">Kapat</button>
         </div>
     </div>
 
@@ -447,11 +416,7 @@
             const performansRaporuModal = document.getElementById('performans-raporu-modal');
             const closePerformansRaporuModalBtn = document.getElementById('close-performans-raporu-modal-btn');
             const performansTableBody = document.getElementById('performans-table-body');
-            const bolgeIadeCard = document.getElementById('bolge-iade-card');
-            const bolgeIadeFileInput = document.getElementById('bolge-iade-file-input');
-            const bolgeIadeModal = document.getElementById('bolge-iade-modal');
-            const closeBolgeIadeModalBtn = document.getElementById('close-bolge-iade-modal-btn');
-            const bolgeIadeTableBody = document.getElementById('bolge-iade-table-body');
+            // Bölge İade ile ilgili JS referansları kaldırıldı
             const isGeriBildirimCheck = document.getElementById('is-geri-bildirim-check');
             const geriBildirimTamamlandiContainer = document.getElementById('geri-bildirim-tamamlandi-container');
             const geriBildirimTamamlandiCheck = document.getElementById('geri-bildirim-tamamlandi-check');
@@ -995,64 +960,9 @@
                 performansRaporuModal.classList.remove('hidden');
             }
 
-            function handleIadeFile(event) {
-                const file = event.target.files[0];
-                if (!file) return;
-
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    const data = new Uint8Array(e.target.result);
-                    const workbook = XLSX.read(data, { type: 'array' });
-                    const sheetName = workbook.SheetNames[0];
-                    const worksheet = workbook.Sheets[sheetName];
-                    const json = XLSX.utils.sheet_to_json(worksheet);
-
-                    const bolgedeKalanlar = new Set();
-                    json.forEach(row => {
-                        const ilce = row['İlçe'] ? String(row['İlçe']).trim().toLocaleUpperCase('tr-TR') : '';
-                        const mahalle = row['Mahalle'] ? String(row['Mahalle']).trim().toLocaleUpperCase('tr-TR') : '';
-                        if (ilce && mahalle) {
-                            bolgedeKalanlar.add(`${ilce}-${mahalle}`);
-                        }
-                    });
-
-                    const mudurOnayliListesi = taskData.filter(task => task.mudur);
-
-                    const iadeEdilenler = mudurOnayliListesi.filter(task => {
-                        const identifier = `${task.ilce.toLocaleUpperCase('tr-TR')}-${task.mahalle.toLocaleUpperCase('tr-TR')}`;
-                        return !bolgedeKalanlar.has(identifier);
-                    });
-
-                    openIadeRaporuModal(iadeEdilenler);
-
-                    event.target.value = '';
-                };
-                reader.readAsArrayBuffer(file);
-            }
-
-            function openIadeRaporuModal(iadeListesi) {
-                if (iadeListesi.length === 0) {
-                    bolgeIadeTableBody.innerHTML = `<tr><td colspan="4" class="text-center p-8 text-gray-500">Bölgeden iade edilen işlem bulunamadı. Müdür onaylı tüm işlemler bölgede bekliyor.</td></tr>`;
-                } else {
-                    bolgeIadeTableBody.innerHTML = iadeListesi.map(task => `
-                        <tr class="hover:bg-gray-50 cursor-pointer" data-ilce="${task.ilce}" data-mahalle="${task.mahalle}">
-                            <td class="px-6 py-4 whitespace-nowrap">${task.ilce}</td>
-                            <td class="px-6 py-4 whitespace-nowrap">${task.mahalle}</td>
-                            <td class="px-6 py-4 whitespace-nowrap">${task.personel}</td>
-                            <td class="px-6 py-4 whitespace-nowrap">${task.mudur}</td>
-                        </tr>
-                    `).join('');
-                    
-                    document.querySelectorAll('#bolge-iade-table-body tr').forEach(row => {
-                        row.addEventListener('click', () => {
-                            bolgeIadeModal.classList.add('hidden');
-                            openEditModal(row.dataset.ilce, row.dataset.mahalle);
-                        });
-                    });
-                }
-                bolgeIadeModal.classList.remove('hidden');
-            }
-
+            // Bölge İade Fonksiyonları Kaldırıldı
+            // handleIadeFile
+            // openIadeRaporuModal
 
             function renderNotesModal() {
                 const notedTasks = taskData.filter(task => task.not && task.not.trim() !== '').sort((a,b) => (b.not_tarihi || '').localeCompare(a.not_tarihi || ''));
@@ -1288,9 +1198,11 @@
                 notCard.addEventListener('click', renderNotesModal);
                 closeNotesModalBtn.addEventListener('click', () => notesModal.classList.add('hidden'));
                 downloadNotesExcelBtn.addEventListener('click', downloadNotesExcel);
-                bolgeIadeCard.addEventListener('click', () => bolgeIadeFileInput.click());
-                bolgeIadeFileInput.addEventListener('change', handleIadeFile);
-                closeBolgeIadeModalBtn.addEventListener('click', () => bolgeIadeModal.classList.add('hidden'));
+                
+                // Bölge İade event listener'ları kaldırıldı
+                // bolgeIadeCard.addEventListener('click', () => bolgeIadeFileInput.click());
+                // bolgeIadeFileInput.addEventListener('change', handleIadeFile);
+                // closeBolgeIadeModalBtn.addEventListener('click', () => bolgeIadeModal.classList.add('hidden'));
                 
                 megsisCard.addEventListener('click', () => openApprovalModal('megsis'));
                 netigmaBekleyenCard.addEventListener('click', () => openApprovalModal('netigmaBekleyen'));
