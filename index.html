@@ -18,7 +18,7 @@
             overflow-x: auto;
         }
         .table-container::-webkit-scrollbar { width: 8px; height: 8px; }
-        .table-container::-webkit-scrollbar-track { background: #f1f1f1; }
+        .table-container::-webkit-scrollbar-track { background: #f1f1ff; }
         .table-container::-webkit-scrollbar-thumb { background: #888; border-radius: 4px; }
         .table-container::-webkit-scrollbar-thumb:hover { background: #555; }
         #task-table tr, #notes-table-body tr, #approval-table-body tr, #bolge-iade-table-body tr {
@@ -102,6 +102,10 @@
                 <div id="netigma-card" class="bg-white p-4 rounded-xl shadow text-center cursor-pointer hover:bg-gray-50 transition">
                     <h3 class="text-sm font-medium text-gray-500">Netigma Onay</h3>
                     <p id="netigma-onay-count" class="mt-1 text-3xl font-semibold text-blue-600">0</p>
+                </div>
+                <div id="mudur-bekleyen-card" class="bg-white p-4 rounded-xl shadow text-center cursor-pointer hover:bg-gray-50 transition">
+                    <h3 class="text-sm font-medium text-gray-500">Müdür Onayı Bekleyen</h3>
+                    <p id="mudur-bekleyen-count" class="mt-1 text-3xl font-semibold text-orange-500">0</p>
                 </div>
                 <div id="mudur-card" class="bg-white p-4 rounded-xl shadow text-center cursor-pointer hover:bg-gray-50 transition">
                     <h3 class="text-sm font-medium text-gray-500">Müdür Onay</h3>
@@ -348,6 +352,7 @@
         
         function toTitleCase(str) {
             if (!str) return '';
+            // Metni tamamen BÜYÜK harfe çevir (Türkçe karakter destekli)
             return str.toString().toLocaleUpperCase('tr-TR');
         }
         
@@ -381,84 +386,81 @@
 
         // --- İŞ TAKİP SCRIPT (self-contained) ---
         const initIsTakip = (() => {
-            // Değişkenleri burada SADECE 'let' ile tanımla
             let isLoaded = false;
-            let ilceFilter, mahalleFilter, personelFilter, hizliAramaInput, taskTable, addEntryBtn, modal, cancelBtn, saveEntryBtn, modalTitle, modalIlce, modalMahalle, modalPersonel, megsisDate, netigmaDate, mudurDate, modalNot, notTarihiContainer, notTarihiInput, loadingState, downloadTakipExcelBtn, toplamMahalleCountEl, megsisCard, netigmaCard, mudurCard, megsisOnayCountEl, netigmaOnayCountEl, mudurOnayCountEl, notCard, notCountEl, gununOzetiCard, gununOzetiCountEl, gununOzetiModal, closeGununOzetiModalBtn, gununOzetiTableBody, downloadGununOzetiExcelBtn, netigmaBekleyenCard, netigmaBekleyenCountEl, mefsisBekleyenlerContainer, mefsisBekleyenlerListesi, geriBildirimBekleyenlerContainer, geriBildirimBekleyenlerListesi, netigmaOnayBekleyenlerContainer, netigmaOnayBekleyenlerListesi, notesModal, closeNotesModalBtn, notesTableBody, downloadNotesExcelBtn, approvalModal, closeApprovalModalBtn, approvalModalTitle, approvalDateHeader, approvalTableBody, interactiveListContainer, performansRaporuCard, performansRaporuModal, closePerformansRaporuModalBtn, performansTableBody, bolgeIadeCard, bolgeIadeFileInput, bolgeIadeModal, closeBolgeIadeModalBtn, bolgeIadeTableBody, isGeriBildirimCheck, geriBildirimTamamlandiContainer, geriBildirimTamamlandiCheck;
+            const ilceFilter = document.getElementById('takip-ilce-filter');
+            const mahalleFilter = document.getElementById('takip-mahalle-filter');
+            const personelFilter = document.getElementById('takip-personel-filter');
+            const hizliAramaInput = document.getElementById('hizli-arama-input');
+            const taskTable = document.getElementById('task-table');
+            const addEntryBtn = document.getElementById('add-entry-btn');
+            const modal = document.getElementById('entry-modal');
+            const cancelBtn = document.getElementById('cancel-btn');
+            const saveEntryBtn = document.getElementById('save-entry-btn');
+            const modalTitle = document.getElementById('modal-title');
+            const modalIlce = document.getElementById('modal-ilce');
+            const modalMahalle = document.getElementById('modal-mahalle');
+            const modalPersonel = document.getElementById('modal-personel');
+            const megsisDate = document.getElementById('megsis-date');
+            const netigmaDate = document.getElementById('netigma-date');
+            const mudurDate = document.getElementById('mudur-date');
+            const modalNot = document.getElementById('modal-not');
+            const notTarihiContainer = document.getElementById('not-tarihi-container');
+            const notTarihiInput = document.getElementById('not-tarihi');
+            const loadingState = document.getElementById('loading-state-takip');
+            const downloadTakipExcelBtn = document.getElementById('download-takip-excel-btn');
+            const toplamMahalleCountEl = document.getElementById('toplam-mahalle-count');
+            const megsisCard = document.getElementById('megsis-card');
+            const netigmaCard = document.getElementById('netigma-card');
+            const mudurCard = document.getElementById('mudur-card');
+            const megsisOnayCountEl = document.getElementById('megsis-onay-count');
+            const netigmaOnayCountEl = document.getElementById('netigma-onay-count');
+            const mudurOnayCountEl = document.getElementById('mudur-onay-count');
+            const notCard = document.getElementById('not-card');
+            const notCountEl = document.getElementById('not-count');
+            const gununOzetiCard = document.getElementById('gunun-ozeti-card');
+            const gununOzetiCountEl = document.getElementById('gunun-ozeti-count');
+            const gununOzetiModal = document.getElementById('gunun-ozeti-modal');
+            const closeGununOzetiModalBtn = document.getElementById('close-gunun-ozeti-modal-btn');
+            const gununOzetiTableBody = document.getElementById('gunun-ozeti-table-body');
+            const downloadGununOzetiExcelBtn = document.getElementById('download-gunun-ozeti-excel-btn');
+            const netigmaBekleyenCard = document.getElementById('netigma-bekleyen-card');
+            const netigmaBekleyenCountEl = document.getElementById('netigma-bekleyen-count');
+            const mudurBekleyenCard = document.getElementById('mudur-bekleyen-card');
+            const mudurBekleyenCountEl = document.getElementById('mudur-bekleyen-count');
+            const mefsisBekleyenlerContainer = document.getElementById('megsis-bekleyenler-container');
+            const mefsisBekleyenlerListesi = document.getElementById('megsis-bekleyenler-listesi');
+            const geriBildirimBekleyenlerContainer = document.getElementById('geri-bildirim-bekleyenler-container');
+            const geriBildirimBekleyenlerListesi = document.getElementById('geri-bildirim-bekleyenler-listesi');
+            const netigmaOnayBekleyenlerContainer = document.getElementById('netigma-onay-bekleyenler-container');
+            const netigmaOnayBekleyenlerListesi = document.getElementById('netigma-onay-bekleyenler-listesi');
+            const notesModal = document.getElementById('notes-modal');
+            const closeNotesModalBtn = document.getElementById('close-notes-modal-btn');
+            const notesTableBody = document.getElementById('notes-table-body');
+            const downloadNotesExcelBtn = document.getElementById('download-notes-excel-btn');
+            const approvalModal = document.getElementById('approval-modal');
+            const closeApprovalModalBtn = document.getElementById('close-approval-modal-btn');
+            const approvalModalTitle = document.getElementById('approval-modal-title');
+            const approvalDateHeader = document.getElementById('approval-date-header');
+            const approvalTableBody = document.getElementById('approval-table-body');
+            const interactiveListContainer = document.getElementById('interactive-list-container');
+            const performansRaporuCard = document.getElementById('performans-raporu-card');
+            const performansRaporuModal = document.getElementById('performans-raporu-modal');
+            const closePerformansRaporuModalBtn = document.getElementById('close-performans-raporu-modal-btn');
+            const performansTableBody = document.getElementById('performans-table-body');
+            const bolgeIadeCard = document.getElementById('bolge-iade-card');
+            const bolgeIadeFileInput = document.getElementById('bolge-iade-file-input');
+            const bolgeIadeModal = document.getElementById('bolge-iade-modal');
+            const closeBolgeIadeModalBtn = document.getElementById('close-bolge-iade-modal-btn');
+            const bolgeIadeTableBody = document.getElementById('bolge-iade-table-body');
+            const isGeriBildirimCheck = document.getElementById('is-geri-bildirim-check');
+            const geriBildirimTamamlandiContainer = document.getElementById('geri-bildirim-tamamlandi-container');
+            const geriBildirimTamamlandiCheck = document.getElementById('geri-bildirim-tamamlandi-check');
+
 
             let taskData = [], personelFileSha = '';
             let currentDisplayData = [];
             const GITHUB_FILE_URL = 'https://api.github.com/repos/gokhangeo/mersin-th/contents/Personel.xlsx';
             
-            // Tüm DOM elementlerini 'init' fonksiyonu içinde ata
-            function assignDomElements() {
-                ilceFilter = document.getElementById('takip-ilce-filter');
-                mahalleFilter = document.getElementById('takip-mahalle-filter');
-                personelFilter = document.getElementById('takip-personel-filter');
-                hizliAramaInput = document.getElementById('hizli-arama-input');
-                taskTable = document.getElementById('task-table');
-                addEntryBtn = document.getElementById('add-entry-btn');
-                modal = document.getElementById('entry-modal');
-                cancelBtn = document.getElementById('cancel-btn');
-                saveEntryBtn = document.getElementById('save-entry-btn');
-                modalTitle = document.getElementById('modal-title');
-                modalIlce = document.getElementById('modal-ilce');
-                modalMahalle = document.getElementById('modal-mahalle');
-                modalPersonel = document.getElementById('modal-personel');
-                megsisDate = document.getElementById('megsis-date');
-                netigmaDate = document.getElementById('netigma-date');
-                mudurDate = document.getElementById('mudur-date');
-                modalNot = document.getElementById('modal-not');
-                notTarihiContainer = document.getElementById('not-tarihi-container');
-                notTarihiInput = document.getElementById('not-tarihi');
-                loadingState = document.getElementById('loading-state-takip');
-                downloadTakipExcelBtn = document.getElementById('download-takip-excel-btn');
-                toplamMahalleCountEl = document.getElementById('toplam-mahalle-count');
-                megsisCard = document.getElementById('megsis-card');
-                netigmaCard = document.getElementById('netigma-card');
-                mudurCard = document.getElementById('mudur-card');
-                megsisOnayCountEl = document.getElementById('megsis-onay-count');
-                netigmaOnayCountEl = document.getElementById('netigma-onay-count');
-                mudurOnayCountEl = document.getElementById('mudur-onay-count');
-                notCard = document.getElementById('not-card');
-                notCountEl = document.getElementById('not-count');
-                gununOzetiCard = document.getElementById('gunun-ozeti-card');
-                gununOzetiCountEl = document.getElementById('gunun-ozeti-count');
-                gununOzetiModal = document.getElementById('gunun-ozeti-modal');
-                closeGununOzetiModalBtn = document.getElementById('close-gunun-ozeti-modal-btn');
-                gununOzetiTableBody = document.getElementById('gunun-ozeti-table-body');
-                downloadGununOzetiExcelBtn = document.getElementById('download-gunun-ozeti-excel-btn');
-                netigmaBekleyenCard = document.getElementById('netigma-bekleyen-card');
-                netigmaBekleyenCountEl = document.getElementById('netigma-bekleyen-count');
-                mefsisBekleyenlerContainer = document.getElementById('megsis-bekleyenler-container');
-                mefsisBekleyenlerListesi = document.getElementById('megsis-bekleyenler-listesi');
-                geriBildirimBekleyenlerContainer = document.getElementById('geri-bildirim-bekleyenler-container');
-                geriBildirimBekleyenlerListesi = document.getElementById('geri-bildirim-bekleyenler-listesi');
-                netigmaOnayBekleyenlerContainer = document.getElementById('netigma-onay-bekleyenler-container');
-                netigmaOnayBekleyenlerListesi = document.getElementById('netigma-onay-bekleyenler-listesi');
-                notesModal = document.getElementById('notes-modal');
-                closeNotesModalBtn = document.getElementById('close-notes-modal-btn');
-                notesTableBody = document.getElementById('notes-table-body');
-                downloadNotesExcelBtn = document.getElementById('download-notes-excel-btn');
-                approvalModal = document.getElementById('approval-modal');
-                closeApprovalModalBtn = document.getElementById('close-approval-modal-btn');
-                approvalModalTitle = document.getElementById('approval-modal-title');
-                approvalDateHeader = document.getElementById('approval-date-header');
-                approvalTableBody = document.getElementById('approval-table-body');
-                interactiveListContainer = document.getElementById('interactive-list-container');
-                performansRaporuCard = document.getElementById('performans-raporu-card');
-                performansRaporuModal = document.getElementById('performans-raporu-modal');
-                closePerformansRaporuModalBtn = document.getElementById('close-performans-raporu-modal-btn');
-                performansTableBody = document.getElementById('performans-table-body');
-                bolgeIadeCard = document.getElementById('bolge-iade-card');
-                bolgeIadeFileInput = document.getElementById('bolge-iade-file-input');
-                bolgeIadeModal = document.getElementById('bolge-iade-modal');
-                closeBolgeIadeModalBtn = document.getElementById('close-bolge-iade-modal-btn');
-                bolgeIadeTableBody = document.getElementById('bolge-iade-table-body');
-                isGeriBildirimCheck = document.getElementById('is-geri-bildirim-check');
-                geriBildirimTamamlandiContainer = document.getElementById('geri-bildirim-tamamlandi-container');
-                geriBildirimTamamlandiCheck = document.getElementById('geri-bildirim-tamamlandi-check');
-            }
-
             async function loadTakipData() {
                  try {
                       loadingState.textContent = 'GitHub\'dan veriler okunuyor...';
@@ -605,6 +607,7 @@
                 const mudurOnay = dataToScan.filter(task => task.mudur).length;
                 const notDüşülenler = dataToScan.filter(task => task.not && task.not.trim() !== '').length;
                 const netigmaBekleyen = dataToScan.filter(task => task.megsis && !task.netigma).length;
+                const mudurBekleyen = dataToScan.filter(task => task.netigma && !task.mudur).length;
                 const gununOlaylari = taskData.filter(task => task.megsis === todayString || task.netigma === todayString || task.mudur === todayString || task.not_tarihi === todayString).length;
 
                 toplamMahalleCountEl.textContent = ilceFilter.value === 'Tümü' ? taskData.length : toplamMahalle;
@@ -613,6 +616,7 @@
                 mudurOnayCountEl.textContent = mudurOnay;
                 notCountEl.textContent = notDüşülenler;
                 netigmaBekleyenCountEl.textContent = netigmaBekleyen;
+                mudurBekleyenCountEl.textContent = mudurBekleyen;
                 gununOzetiCountEl.textContent = gununOlaylari;
             }
 
@@ -927,8 +931,8 @@
                         
                         if (workDays > 0) {
                             avgWorkDaysPerUnit = (completedCount / workDays).toFixed(2); // New logic: Units / Day
-                        } else if (completedCount > 0 && workDays === 0) {
-                             avgWorkDaysPerUnit = '-'; // Tamamlandı ama iş günü 0, tanımsız
+                        } else if (completedCount > 0 && workDays <= 0) { // Same day completion
+                             avgWorkDaysPerUnit = completedCount.toFixed(2);
                         }
                     }
 
@@ -962,8 +966,8 @@
                         megsis: megsisInPeriod, 
                         netigma: netigmaInPeriod, 
                         mudur: mudurInPeriod,
-                        tamamlanan: completedCount,
-                        avgWorkDays: avgWorkDaysPerUnit
+                        tamamlanan: completedCount, // All time completed
+                        avgWorkDays: avgWorkDaysPerUnit // All time average
                     };
                 });
                 
@@ -1118,6 +1122,11 @@
                         header = 'Netigma Onay Tarihi';
                         approvedTasks = currentDisplayData.filter(task => task.netigma).sort((a, b) => b.netigma.localeCompare(a.netigma));
                         break;
+                    case 'mudurBekleyen':
+                        title = 'Müdür Onayı Bekleyenler';
+                        header = 'Netigma Onay Tarihi';
+                        approvedTasks = currentDisplayData.filter(task => task.netigma && !task.mudur).sort((a, b) => b.netigma.localeCompare(a.netigma));
+                        break;
                     case 'mudur':
                         title = 'Müdür Onayı Olan Birimler';
                         header = 'Müdür Onay Tarihi';
@@ -1128,14 +1137,24 @@
                 approvalDateHeader.textContent = header;
 
                 
-                approvalTableBody.innerHTML = approvedTasks.length === 0 ? `<tr><td colspan="4" class="text-center p-8 text-gray-500">Bu kritere uygun birim bulunamadı.</td></tr>` : approvedTasks.map(task => `
+                approvalTableBody.innerHTML = approvedTasks.length === 0 ? `<tr><td colspan="4" class="text-center p-8 text-gray-500">Bu kritere uygun birim bulunamadı.</td></tr>` : approvedTasks.map(task => {
+                    let dateToShow;
+                    if (approvalType === 'netigmaBekleyen') {
+                        dateToShow = task.megsis;
+                    } else if (approvalType === 'mudurBekleyen') {
+                        dateToShow = task.netigma;
+                    } else {
+                        dateToShow = task[approvalType];
+                    }
+                    
+                    return `
                     <tr class="hover:bg-gray-50 cursor-pointer" data-task-ilce="${task.ilce}" data-task-mahalle="${task.mahalle}">
                         <td class="px-6 py-4 whitespace-nowrap">${task.ilce}</td>
                         <td class="px-6 py-4 whitespace-nowrap">${task.mahalle}</td>
                         <td class="px-6 py-4 whitespace-nowrap">${task.personel}</td>
-                        <td class="px-6 py-4 whitespace-nowrap">${task[approvalType === 'netigmaBekleyen' ? 'megsis' : approvalType]}</td>
+                        <td class="px-6 py-4 whitespace-nowrap">${dateToShow}</td>
                     </tr>
-                `).join('');
+                `}).join('');
 
                 document.querySelectorAll('#approval-table-body tr[data-task-ilce]').forEach(row => {
                     row.addEventListener('click', () => {
@@ -1148,10 +1167,6 @@
 
             async function init() {
                 if(isLoaded) return;
-                
-                // DOM elementlerini ata
-                assignDomElements();
-                
                 isLoaded = true;
                 await loadTakipData();
                 
@@ -1280,6 +1295,7 @@
                 megsisCard.addEventListener('click', () => openApprovalModal('megsis'));
                 netigmaBekleyenCard.addEventListener('click', () => openApprovalModal('netigmaBekleyen'));
                 netigmaCard.addEventListener('click', () => openApprovalModal('netigma'));
+                mudurBekleyenCard.addEventListener('click', () => openApprovalModal('mudurBekleyen'));
                 mudurCard.addEventListener('click', () => openApprovalModal('mudur'));
                 closeApprovalModalBtn.addEventListener('click', () => approvalModal.classList.add('hidden'));
             }
@@ -1289,5 +1305,3 @@
     </script>
 </body>
 </html>
-
-
