@@ -909,6 +909,15 @@
                             <label for="check-${p.replace(/\s/g, '-')}" class="ml-2 block text-sm text-gray-900">${p}</label>
                         </div>
                     `).join('');
+
+                    // Checkbox'lere event listener ekle (sadece bir kez)
+                    performansPersonelFiltresi.querySelectorAll('input[type="checkbox"]').forEach(checkbox => {
+                        checkbox.addEventListener('change', () => {
+                            // Aktif periyodu bul
+                            const activePeriod = document.querySelector('#performans-raporu-modal .period-btn.bg-blue-600').dataset.period || 'all';
+                            generatePerformanceReport(activePeriod); // Raporu yeniden çalıştır
+                        });
+                    });
                 }
                 
                 // Get list of *selected* personnel for the report
@@ -1237,9 +1246,13 @@
                 // Add new listeners
                 performansSelectAll.addEventListener('click', () => {
                     performansPersonelFiltresi.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.checked = true);
+                    const activePeriod = document.querySelector('#performans-raporu-modal .period-btn.bg-blue-600').dataset.period || 'all';
+                    generatePerformanceReport(activePeriod); // Raporu yeniden çalıştır
                 });
                 performansDeselectAll.addEventListener('click', () => {
                     performansPersonelFiltresi.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.checked = false);
+                    const activePeriod = document.querySelector('#performans-raporu-modal .period-btn.bg-blue-600').dataset.period || 'all';
+                    generatePerformanceReport(activePeriod); // Raporu yeniden çalıştır
                 });
 
 
