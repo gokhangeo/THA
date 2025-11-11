@@ -39,7 +39,8 @@
     </style>
 </head>
 <body class="text-gray-800">
-    <input type="file" id="bolge-iade-file-input" class="hidden" accept=".xlsx, .xls, .csv">
+    <!-- Input alanı kaldırıldı -->
+    <!-- <input type="file" id="bolge-iade-file-input" class="hidden" accept=".xlsx, .xls, .csv"> -->
     <!-- Login Screen -->
     <div id="login-screen" class="flex items-center justify-center min-h-screen bg-gradient-to-br from-blue-100 to-gray-100">
         <div class="w-full max-w-md p-8 space-y-6 bg-white rounded-xl shadow-2xl">
@@ -277,6 +278,20 @@
                             <button data-period="all" class="period-btn bg-blue-600 text-white font-bold py-1 px-3 rounded-lg text-sm">Tüm Zamanlar</button>
                         </div>
                     </div>
+                     <!-- NEW FILTER AREA -->
+                    <div id="performans-personel-filtresi-container" class="mt-4 p-4 bg-gray-50 rounded-lg border">
+                        <div class="flex justify-between items-center mb-2">
+                            <label class="text-sm font-medium text-gray-700">Personelleri Filtrele:</label>
+                            <div>
+                                <button id="performans-select-all" class="text-xs text-blue-600 hover:underline">Tümünü Seç</button>
+                                <button id="performans-deselect-all" class="ml-2 text-xs text-blue-600 hover:underline">Tümünü Kaldır</button>
+                            </div>
+                        </div>
+                        <div id="performans-personel-filtresi" class="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-2">
+                            <!-- Checkboxes will be injected here -->
+                        </div>
+                    </div>
+                    <!-- END NEW FILTER AREA -->
                     <div class="mt-4 table-container" style="max-height: 70vh;">
                         <table class="min-w-full divide-y divide-gray-200">
                             <thead class="bg-gray-50 sticky top-0">
@@ -414,6 +429,9 @@
             const performansRaporuModal = document.getElementById('performans-raporu-modal');
             const closePerformansRaporuModalBtn = document.getElementById('close-performans-raporu-modal-btn');
             const performansTableBody = document.getElementById('performans-table-body');
+            const performansPersonelFiltresi = document.getElementById('performans-personel-filtresi');
+            const performansSelectAll = document.getElementById('performans-select-all');
+            const performansDeselectAll = document.getElementById('performans-deselect-all');
             const isGeriBildirimCheck = document.getElementById('is-geri-bildirim-check');
             const geriBildirimTamamlandiContainer = document.getElementById('geri-bildirim-tamamlandi-container');
             const geriBildirimTamamlandiCheck = document.getElementById('geri-bildirim-tamamlandi-check');
@@ -882,10 +900,23 @@
                 const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
                 startOfMonth.setHours(0,0,0,0);
 
-                const personeller = [...new Set(taskData.map(p => p.personel))].sort();
+                // Populate filter list on first open
+                if (performansPersonelFiltresi.innerHTML.trim() === '') {
+                    const allPersoneller = [...new Set(taskData.map(p => p.personel))].sort();
+                    performansPersonelFiltresi.innerHTML = allPersoneller.map(p => `
+                        <div class="flex items-center">
+                            <input id="check-${p.replace(/\s/g, '-')}" name="perf-personel" type="checkbox" value="${p}" class="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded" checked>
+                            <label for="check-${p.replace(/\s/g, '-')}" class="ml-2 block text-sm text-gray-900">${p}</label>
+                        </div>
+                    `).join('');
+                }
+                
+                // Get list of *selected* personnel for the report
+                const selectedPersonnel = Array.from(performansPersonelFiltresi.querySelectorAll('input[type="checkbox"]:checked')).map(cb => cb.value);
+
                 const stats = {};
 
-                personeller.forEach(p => {
+                selectedPersonnel.forEach(p => {
                     const personTasks = taskData.filter(t => t.personel === p);
 
                     // Calculate all-time stats
@@ -897,15 +928,15 @@
                     
                     const completedCount = personTasks.filter(t => t.megsis && t.netigma && t.mudur).length;
                     
-                    let avgWorkDaysPerUnit = '0.00'; // Default to 0.00
+                    let avgWorkDaysPerUnit = '0.00';
                     if (megsisDates.length > 0 && completedCount > 0) {
                         const firstMegsisDate = megsisDates[0];
                         const today = new Date();
                         const workDays = calculateWorkDays(firstMegsisDate, today);
                         
                         if (workDays > 0) {
-                            avgWorkDaysPerUnit = (completedCount / workDays).toFixed(2); // New logic: Units / Day
-                        } else if (completedCount > 0 && workDays <= 0) { // Same day completion
+                            avgWorkDaysPerUnit = (completedCount / workDays).toFixed(2); 
+                        } else if (completedCount > 0 && workDays <= 0) {
                              avgWorkDaysPerUnit = completedCount.toFixed(2);
                         }
                     }
@@ -940,8 +971,8 @@
                         megsis: megsisInPeriod, 
                         netigma: netigmaInPeriod, 
                         mudur: mudurInPeriod,
-                        tamamlanan: completedCount, // All time completed
-                        avgWorkDays: avgWorkDaysPerUnit // All time average
+                        tamamlanan: completedCount, 
+                        avgWorkDays: avgWorkDaysPerUnit 
                     };
                 });
                 
@@ -1193,11 +1224,24 @@
                     XLSX.writeFile(wb, 'is_takip_raporu.xlsx');
                 });
 
-                performansRaporuCard.addEventListener('click', () => generatePerformanceReport('all'));
+                performansRaporuCard.addEventListener('click', () => {
+                    // Clear the filter list to force repopulation with all staff
+                    performansPersonelFiltresi.innerHTML = ''; 
+                    generatePerformanceReport('all');
+                });
                 closePerformansRaporuModalBtn.addEventListener('click', () => performansRaporuModal.classList.add('hidden'));
                 document.querySelectorAll('#performans-raporu-modal .period-btn').forEach(btn => {
                     btn.addEventListener('click', () => generatePerformanceReport(btn.dataset.period));
                 });
+                
+                // Add new listeners
+                performansSelectAll.addEventListener('click', () => {
+                    performansPersonelFiltresi.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.checked = true);
+                });
+                performansDeselectAll.addEventListener('click', () => {
+                    performansPersonelFiltresi.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.checked = false);
+                });
+
 
                 gununOzetiCard.addEventListener('click', openGununOzetiModal);
                 closeGununOzetiModalBtn.addEventListener('click', () => gununOzetiModal.classList.add('hidden'));
