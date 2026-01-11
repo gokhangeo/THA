@@ -1,17 +1,6 @@
 <!DOCTYPE html>
 <html lang="tr">
-<!-- PWA Kodları (head içine) -->
-<link rel="manifest" href="./manifest.json">
-<meta name="theme-color" content="#4f46e5">
-<link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/1067/1067256.png">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<script>
-  if ('serviceWorker' in navigator) {
-    window.addEventListener('load', () => {
-      navigator.serviceWorker.register('./service-worker.js');
-    });
-  }
-</script>
+<head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Mersin İli THA İş Takip Sistemi</title>
@@ -32,7 +21,7 @@
         .table-container::-webkit-scrollbar-track { background: #f1f1f1; }
         .table-container::-webkit-scrollbar-thumb { background: #888; border-radius: 4px; }
         .table-container::-webkit-scrollbar-thumb:hover { background: #555; }
-        #task-table tr, #notes-table-body tr, #approval-table-body tr, #bolge-iade-table-body tr {
+        #task-table tr, #notes-table-body tr, #approval-table-body tr {
             cursor: pointer;
         }
         .ilce-header .arrow {
@@ -50,8 +39,6 @@
     </style>
 </head>
 <body class="text-gray-800">
-    <!-- Input alanı kaldırıldı -->
-    <!-- <input type="file" id="bolge-iade-file-input" class="hidden" accept=".xlsx, .xls, .csv"> -->
     <!-- Login Screen -->
     <div id="login-screen" class="flex items-center justify-center min-h-screen bg-gradient-to-br from-blue-100 to-gray-100">
         <div class="w-full max-w-md p-8 space-y-6 bg-white rounded-xl shadow-2xl">
@@ -86,8 +73,8 @@
             </header>
             
             <!-- Summary Cards -->
-            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 mb-6">
-                 <div id="performans-raporu-card" class="bg-white p-4 rounded-xl shadow text-center cursor-pointer hover:bg-gray-50 transition hidden">
+            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6 mb-6">
+                <div id="performans-raporu-card" class="bg-white p-4 rounded-xl shadow text-center cursor-pointer hover:bg-gray-50 transition hidden">
                     <h3 class="text-sm font-medium text-gray-500">Performans Raporu</h3>
                     <p class="mt-1 text-3xl font-semibold text-orange-500">📊</p>
                 </div>
@@ -95,9 +82,13 @@
                     <h3 class="text-sm font-medium text-gray-500">Günün Özeti</h3>
                     <p id="gunun-ozeti-count" class="mt-1 text-3xl font-semibold text-teal-600">0</p>
                 </div>
-                <div class="bg-white p-4 rounded-xl shadow text-center">
+                <div class="bg-white p-4 rounded-xl shadow text-center border-b-2 border-gray-200">
                     <h3 class="text-sm font-medium text-gray-500">Toplam Mahalle</h3>
                     <p id="toplam-mahalle-count" class="mt-1 text-3xl font-semibold text-gray-900">0</p>
+                </div>
+                <div id="megsis-bekleyen-birim-card" class="bg-white p-4 rounded-xl shadow text-center cursor-pointer hover:bg-gray-50 transition border-b-2 border-red-500">
+                    <h3 class="text-sm font-medium text-gray-500">Megsis Bekleyen</h3>
+                    <p id="megsis-bekleyen-birim-count" class="mt-1 text-3xl font-semibold text-red-600">0</p>
                 </div>
                 <div id="megsis-card" class="bg-white p-4 rounded-xl shadow text-center cursor-pointer hover:bg-gray-50 transition">
                     <h3 class="text-sm font-medium text-gray-500">Megsis Onay</h3>
@@ -130,19 +121,16 @@
                  <div id="netigma-onay-bekleyenler-container" class="p-4 bg-green-50 border border-green-200 rounded-lg hidden">
                     <h3 class="font-bold text-green-800 mb-3 text-center text-lg">Netigma Onayı Bekleyenler</h3>
                     <div id="netigma-onay-bekleyenler-listesi" class="flex flex-wrap justify-center gap-2">
-                        <!-- Blinking green items will be injected here by JS -->
                     </div>
                 </div>
                 <div id="megsis-bekleyenler-container" class="p-4 bg-red-50 border border-red-200 rounded-lg hidden">
                     <h3 class="font-bold text-red-800 mb-3 text-center text-lg">MEGSİS Onayı Bekleyen Notlar (İade Olanlar)</h3>
                     <div id="megsis-bekleyenler-listesi" class="flex flex-wrap justify-center gap-2">
-                        <!-- Blinking items will be injected here by JS -->
                     </div>
                 </div>
                 <div id="geri-bildirim-bekleyenler-container" class="p-4 bg-blue-50 border border-blue-200 rounded-lg hidden">
                     <h3 class="font-bold text-blue-800 mb-3 text-center text-lg">Geri Bildirim Bekleyenler (İade Olanlar)</h3>
                     <div id="geri-bildirim-bekleyenler-listesi" class="flex flex-wrap justify-center gap-2">
-                        <!-- Blinking items will be injected here by JS -->
                     </div>
                 </div>
             </div>
@@ -161,7 +149,6 @@
 
             <!-- Interactive Accordion List -->
             <div id="interactive-list-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 mb-6">
-                <!-- İlçe cards will be injected here -->
             </div>
 
             <div class="bg-white rounded-xl shadow overflow-hidden"><div class="table-container"><table class="min-w-full divide-y divide-gray-200"><thead class="bg-gray-50"><tr><th class="px-2 py-3 sm:px-6 sm:py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">İlçe</th><th class="px-2 py-3 sm:px-6 sm:py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Mahalle</th><th class="px-2 py-3 sm:px-6 sm:py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Görevli Personel</th><th class="px-2 py-3 sm:px-6 sm:py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Megsis Onay</th><th class="px-2 py-3 sm:px-6 sm:py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Netigma Onay</th><th class="px-2 py-3 sm:px-6 sm:py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Müdür Onay</th><th class="px-2 py-3 sm:px-6 sm:py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Not</th></tr></thead><tbody id="task-table" class="bg-white divide-y divide-gray-200"><tr><td colspan="7" class="text-center p-8 text-gray-500"><div id="loading-state-takip">Veriler yükleniyor...</div></td></tr></tbody></table></div></div>
@@ -195,7 +182,6 @@
                                  </tr>
                             </thead>
                             <tbody id="notes-table-body" class="bg-white divide-y divide-gray-200">
-                                <!-- Notes will be injected here -->
                             </tbody>
                         </table>
                     </div>
@@ -224,11 +210,10 @@
                                      <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">İlçe</th>
                                      <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Mahalle</th>
                                      <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Personel</th>
-                                     <th id="approval-date-header" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Onay Tarihi</th>
+                                     <th id="approval-date-header" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tarih</th>
                                  </tr>
                             </thead>
                             <tbody id="approval-table-body" class="bg-white divide-y divide-gray-200">
-                                <!-- Approved items will be injected here -->
                             </tbody>
                         </table>
                     </div>
@@ -262,7 +247,6 @@
                                  </tr>
                             </thead>
                             <tbody id="gunun-ozeti-table-body" class="bg-white divide-y divide-gray-200">
-                                <!-- Daily summary will be injected here -->
                             </tbody>
                         </table>
                     </div>
@@ -289,7 +273,6 @@
                             <button data-period="all" class="period-btn bg-blue-600 text-white font-bold py-1 px-3 rounded-lg text-sm">Tüm Zamanlar</button>
                         </div>
                     </div>
-                     <!-- NEW FILTER AREA -->
                     <div id="performans-personel-filtresi-container" class="mt-4 p-4 bg-gray-50 rounded-lg border">
                         <div class="flex justify-between items-center mb-2">
                             <label class="text-sm font-medium text-gray-700">Personelleri Filtrele:</label>
@@ -299,10 +282,8 @@
                             </div>
                         </div>
                         <div id="performans-personel-filtresi" class="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-2">
-                            <!-- Checkboxes will be injected here -->
                         </div>
                     </div>
-                    <!-- END NEW FILTER AREA -->
                     <div class="mt-4 table-container" style="max-height: 70vh;">
                         <table class="min-w-full divide-y divide-gray-200">
                             <thead class="bg-gray-50 sticky top-0">
@@ -317,7 +298,6 @@
                                 </tr>
                             </thead>
                             <tbody id="performans-table-body" class="bg-white divide-y divide-gray-200">
-                                <!-- Performance data will be injected here -->
                             </tbody>
                         </table>
                     </div>
@@ -329,11 +309,6 @@
         </div>
     </div>
     
-    <!-- Bölge İade Raporu Modal (Kaldırıldı) -->
-    <div id="bolge-iade-modal" class="fixed z-40 inset-0 overflow-y-auto hidden">
-    </div>
-
-
     <script>
     document.addEventListener('DOMContentLoaded', () => {
         const loginScreen = document.getElementById('login-screen');
@@ -345,7 +320,6 @@
         
         function toTitleCase(str) {
             if (!str) return '';
-            // Metni tamamen BÜYÜK harfe çevir (Türkçe karakter destekli)
             return str.toString().toLocaleUpperCase('tr-TR');
         }
         
@@ -354,7 +328,7 @@
             const curDate = new Date(startDate.getTime());
             while (curDate <= endDate) {
                 const dayOfWeek = curDate.getDay();
-                if (dayOfWeek !== 0 && dayOfWeek !== 6) { // 0 = Sunday, 6 = Saturday
+                if (dayOfWeek !== 0 && dayOfWeek !== 6) { 
                     count++;
                 }
                 curDate.setDate(curDate.getDate() + 1);
@@ -362,8 +336,6 @@
             return count;
         }
 
-
-        // --- LOGIN LOGIC ---
         loginForm.addEventListener('submit', (e) => {
             e.preventDefault();
             const username = document.getElementById('username').value;
@@ -371,13 +343,12 @@
             if (username === 'mersinkm' && password === '503344') {
                 loginScreen.classList.add('hidden');
                 mainApp.classList.remove('hidden');
-                initIsTakip(); // Load default page
+                initIsTakip(); 
             } else {
                 errorMessage.classList.remove('hidden');
             }
         });
 
-        // --- İŞ TAKİP SCRIPT (self-contained) ---
         const initIsTakip = (() => {
             let isLoaded = false;
             const ilceFilter = document.getElementById('takip-ilce-filter');
@@ -405,6 +376,8 @@
             const megsisCard = document.getElementById('megsis-card');
             const netigmaCard = document.getElementById('netigma-card');
             const mudurCard = document.getElementById('mudur-card');
+            const megsisBekleyenBirimCard = document.getElementById('megsis-bekleyen-birim-card');
+            const megsisBekleyenBirimCountEl = document.getElementById('megsis-bekleyen-birim-count');
             const megsisOnayCountEl = document.getElementById('megsis-onay-count');
             const netigmaOnayCountEl = document.getElementById('netigma-onay-count');
             const mudurOnayCountEl = document.getElementById('mudur-onay-count');
@@ -559,17 +532,15 @@
                 const selectedPersonel = personelFilter.value;
                 let searchTerm = hizliAramaInput.value.toLowerCase().trim();
 
-                // --- Admin Rapor Gizle/Göster ---
                 if (searchTerm === 'admin.rapor') {
                     document.getElementById('performans-raporu-card').classList.remove('hidden');
-                    hizliAramaInput.value = ''; // Arama kutusunu temizle
-                    searchTerm = ''; // Aramayı temizle
+                    hizliAramaInput.value = ''; 
+                    searchTerm = ''; 
                 } else if (searchTerm === 'admin.gizle') {
                     document.getElementById('performans-raporu-card').classList.add('hidden');
                     hizliAramaInput.value = '';
                     searchTerm = '';
                 }
-                // --- Bitiş ---
 
                 let filteredData = taskData;
 
@@ -609,12 +580,14 @@
                 const netigmaOnay = dataToScan.filter(task => task.netigma).length;
                 const mudurOnay = dataToScan.filter(task => task.mudur).length;
                 const notDüşülenler = dataToScan.filter(task => task.not && task.not.trim() !== '').length;
+                const megsisBekleyenBirim = dataToScan.filter(task => !task.megsis).length;
                 const netigmaBekleyen = dataToScan.filter(task => task.megsis && !task.netigma).length;
                 const mudurBekleyen = dataToScan.filter(task => task.netigma && !task.mudur).length;
                 const gununOlaylari = taskData.filter(task => task.megsis === todayString || task.netigma === todayString || task.mudur === todayString || task.not_tarihi === todayString).length;
 
                 toplamMahalleCountEl.textContent = ilceFilter.value === 'Tümü' ? taskData.length : toplamMahalle;
                 megsisOnayCountEl.textContent = megsisOnay;
+                megsisBekleyenBirimCountEl.textContent = megsisBekleyenBirim;
                 netigmaOnayCountEl.textContent = netigmaOnay;
                 mudurOnayCountEl.textContent = mudurOnay;
                 notCountEl.textContent = notDüşülenler;
@@ -905,13 +878,12 @@
             function generatePerformanceReport(period = 'all') {
                 const now = new Date();
                 const startOfWeek = new Date(now);
-                startOfWeek.setDate(startOfWeek.getDate() - (startOfWeek.getDay() + 6) % 7); // Monday
+                startOfWeek.setDate(startOfWeek.getDate() - (startOfWeek.getDay() + 6) % 7); 
                 startOfWeek.setHours(0,0,0,0);
                 
                 const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
                 startOfMonth.setHours(0,0,0,0);
 
-                // Populate filter list on first open
                 if (performansPersonelFiltresi.innerHTML.trim() === '') {
                     const allPersoneller = [...new Set(taskData.map(p => p.personel))].sort();
                     performansPersonelFiltresi.innerHTML = allPersoneller.map(p => `
@@ -921,17 +893,14 @@
                         </div>
                     `).join('');
 
-                    // Checkbox'lere event listener ekle (sadece bir kez)
                     performansPersonelFiltresi.querySelectorAll('input[type="checkbox"]').forEach(checkbox => {
                         checkbox.addEventListener('change', () => {
-                            // Aktif periyodu bul
                             const activePeriod = document.querySelector('#performans-raporu-modal .period-btn.bg-blue-600').dataset.period || 'all';
-                            generatePerformanceReport(activePeriod); // Raporu yeniden çalıştır
+                            generatePerformanceReport(activePeriod); 
                         });
                     });
                 }
                 
-                // Get list of *selected* personnel for the report
                 const selectedPersonnel = Array.from(performansPersonelFiltresi.querySelectorAll('input[type="checkbox"]:checked')).map(cb => cb.value);
 
                 const stats = {};
@@ -939,7 +908,6 @@
                 selectedPersonnel.forEach(p => {
                     const personTasks = taskData.filter(t => t.personel === p);
 
-                    // Calculate all-time stats
                     const megsisDates = personTasks
                         .map(t => t.megsis)
                         .filter(d => d)
@@ -961,7 +929,6 @@
                         }
                     }
 
-                    // Calculate period-specific stats
                     const megsisInPeriod = personTasks.filter(t => {
                         if (!t.megsis) return false;
                         if (period === 'all') return true;
@@ -1020,8 +987,6 @@
                 performansRaporuModal.classList.remove('hidden');
             }
 
-            // Bölge İade Fonksiyonları Kaldırıldı
-            
             function renderNotesModal() {
                 const notedTasks = taskData.filter(task => task.not && task.not.trim() !== '').sort((a,b) => (b.not_tarihi || '').localeCompare(a.not_tarihi || ''));
                 notesTableBody.innerHTML = '';
@@ -1080,6 +1045,11 @@
                         header = 'Megsis Onay Tarihi';
                         approvedTasks = currentDisplayData.filter(task => task.megsis).sort((a, b) => b.megsis.localeCompare(a.megsis));
                         break;
+                    case 'megsisBekleyen':
+                        title = 'Megsis Onayı Bekleyen Birimler';
+                        header = 'Durum';
+                        approvedTasks = currentDisplayData.filter(task => !task.megsis).sort((a, b) => a.ilce.localeCompare(b.ilce));
+                        break;
                     case 'netigmaBekleyen':
                         title = 'Netigma Onayı Bekleyenler';
                         header = 'Megsis Onay Tarihi';
@@ -1104,13 +1074,14 @@
                 approvalModalTitle.textContent = title;
                 approvalDateHeader.textContent = header;
 
-                
                 approvalTableBody.innerHTML = approvedTasks.length === 0 ? `<tr><td colspan="4" class="text-center p-8 text-gray-500">Bu kritere uygun birim bulunamadı.</td></tr>` : approvedTasks.map(task => {
                     let dateToShow;
                     if (approvalType === 'netigmaBekleyen') {
                         dateToShow = task.megsis;
                     } else if (approvalType === 'mudurBekleyen') {
                         dateToShow = task.netigma;
+                    } else if (approvalType === 'megsisBekleyen') {
+                        dateToShow = '<span class="text-red-500 font-medium">MEGSİS Bekliyor</span>';
                     } else {
                         dateToShow = task[approvalType];
                     }
@@ -1120,7 +1091,7 @@
                         <td class="px-6 py-4 whitespace-nowrap">${task.ilce}</td>
                         <td class="px-6 py-4 whitespace-nowrap">${task.mahalle}</td>
                         <td class="px-6 py-4 whitespace-nowrap">${task.personel}</td>
-                        <td class="px-6 py-4 whitespace-nowrap">${dateToShow}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm">${dateToShow}</td>
                     </tr>
                 `}).join('');
 
@@ -1167,6 +1138,7 @@
                     geriBildirimTamamlandiContainer.classList.add('hidden');
                     modal.classList.remove('hidden');
                 });
+
                 modalIlce.addEventListener('change', () => {
                      const selectedIlce = modalIlce.value;
                      const mahalleler = [...new Set(taskData.filter(p => p.ilce === selectedIlce).map(p => p.mahalle))].sort((a,b) => a.localeCompare(b, 'tr'));
@@ -1179,6 +1151,7 @@
                      notTarihiInput.value = '';
                      notTarihiContainer.classList.add('hidden');
                 });
+
                 modalMahalle.addEventListener('change', () => {
                     const selectedIlce = modalIlce.value;
                     const selectedMahalle = modalMahalle.value;
@@ -1245,7 +1218,6 @@
                 });
 
                 performansRaporuCard.addEventListener('click', () => {
-                    // Clear the filter list to force repopulation with all staff
                     performansPersonelFiltresi.innerHTML = ''; 
                     generatePerformanceReport('all');
                 });
@@ -1254,18 +1226,16 @@
                     btn.addEventListener('click', () => generatePerformanceReport(btn.dataset.period));
                 });
                 
-                // Add new listeners
                 performansSelectAll.addEventListener('click', () => {
                     performansPersonelFiltresi.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.checked = true);
                     const activePeriod = document.querySelector('#performans-raporu-modal .period-btn.bg-blue-600').dataset.period || 'all';
-                    generatePerformanceReport(activePeriod); // Raporu yeniden çalıştır
+                    generatePerformanceReport(activePeriod); 
                 });
                 performansDeselectAll.addEventListener('click', () => {
                     performansPersonelFiltresi.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.checked = false);
                     const activePeriod = document.querySelector('#performans-raporu-modal .period-btn.bg-blue-600').dataset.period || 'all';
-                    generatePerformanceReport(activePeriod); // Raporu yeniden çalıştır
+                    generatePerformanceReport(activePeriod); 
                 });
-
 
                 gununOzetiCard.addEventListener('click', openGununOzetiModal);
                 closeGununOzetiModalBtn.addEventListener('click', () => gununOzetiModal.classList.add('hidden'));
@@ -1274,9 +1244,8 @@
                 closeNotesModalBtn.addEventListener('click', () => notesModal.classList.add('hidden'));
                 downloadNotesExcelBtn.addEventListener('click', downloadNotesExcel);
                 
-                // Bölge İade event listener'ları kaldırıldı
-                
                 megsisCard.addEventListener('click', () => openApprovalModal('megsis'));
+                megsisBekleyenBirimCard.addEventListener('click', () => openApprovalModal('megsisBekleyen'));
                 netigmaBekleyenCard.addEventListener('click', () => openApprovalModal('netigmaBekleyen'));
                 netigmaCard.addEventListener('click', () => openApprovalModal('netigma'));
                 mudurBekleyenCard.addEventListener('click', () => openApprovalModal('mudurBekleyen'));
